@@ -1,13 +1,13 @@
 from flask import request, jsonify
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, get_jwt
 from datetime import datetime, timezone
 from bson import ObjectId
 from utils.db import get_db
 
 def get_my_galleries():
-    identity = get_jwt_identity()
+    user_id = get_jwt_identity()
     db = get_db()
-    galleries = list(db.galleries.find({"user_id": identity["id"]}, sort=[("created_at", -1)]))
+    galleries = list(db.galleries.find({"user_id": user_id}, sort=[("created_at", -1)]))
     result = []
     for g in galleries:
         photo_count = db.photos.count_documents({"gallery_id": str(g["_id"])})
@@ -15,7 +15,9 @@ def get_my_galleries():
     return jsonify({"galleries": result}), 200
 
 def get_gallery(gallery_id):
-    identity = get_jwt_identity()
+    user_id = get_jwt_identity()
+    claims = get_jwt()
+    user_role = claims.get("role", "client")
     db = get_db()
     try:
         gallery = db.galleries.find_one({"_id": ObjectId(gallery_id)})
@@ -23,7 +25,7 @@ def get_gallery(gallery_id):
         return jsonify({"error": "Invalid gallery ID"}), 400
     if not gallery:
         return jsonify({"error": "Gallery not found"}), 404
-    if identity["role"] != "admin" and gallery["user_id"] != identity["id"]:
+    if user_role != "admin" and gallery["user_id"] != user_id:
         return jsonify({"error": "Access denied"}), 403
     photos = list(db.photos.find({"gallery_id": gallery_id}))
     is_paid = gallery.get("is_paid", False)
@@ -31,8 +33,10 @@ def get_gallery(gallery_id):
     return jsonify({"gallery": {"id": str(gallery["_id"]), "title": gallery["title"], "booking_id": gallery.get("booking_id"), "is_paid": is_paid, "photo_count": len(photo_list), "cover_url": gallery.get("cover_url"), "created_at": gallery["created_at"].isoformat() if gallery.get("created_at") else None}, "photos": photo_list}), 200
 
 def upload_photos(gallery_id):
-    identity = get_jwt_identity()
-    if identity["role"] != "admin":
+    user_id = get_jwt_identity()
+    claims = get_jwt()
+    user_role = claims.get("role", "client")
+    if user_role != "admin":
         return jsonify({"error": "Admin access required"}), 403
     db = get_db()
     try:
