@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { ArrowRight, Star, Camera, Instagram, Twitter, Facebook } from "lucide-react";
 import Navbar from "../components/layouts/Navbar";
