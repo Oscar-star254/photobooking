@@ -11,9 +11,12 @@ export default function ProtectedRoute({ children, role }) {
     </div>
   );
 
-  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
-  if (role && user.role !== role && user.role !== "admin") {
+  if (role && user.role !== role) {
+    if (user.role === "admin") return children;
     return <Navigate to="/dashboard" replace />;
   }
 
