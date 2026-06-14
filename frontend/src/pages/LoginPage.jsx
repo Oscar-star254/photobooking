@@ -10,23 +10,25 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const user = await login(form.email, form.password);
-      toast.success(`Welcome back, ${user.full_name.split(" ")[0]}!`);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  try {
+    const user = await login(form.email, form.password);
+    toast.success(`Welcome back, ${user.full_name.split(" ")[0]}!`);
+    // Small delay to let auth context update before redirect
+    setTimeout(() => {
       if (user.role === "admin") {
         window.location.href = "/admin";
       } else {
         window.location.href = "/dashboard";
       }
-    } catch (err) {
-      toast.error(err.response?.data?.error || "Login failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    }, 500);
+  } catch (err) {
+    toast.error(err.response?.data?.error || "Login failed.");
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4">

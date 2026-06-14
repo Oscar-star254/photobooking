@@ -14,13 +14,14 @@ export function AuthProvider({ children }) {
     if (token && savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
-        setUser(parsedUser);
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        setUser(parsedUser);
       } catch (e) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     } else if (token) {
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       api.get("/auth/profile")
