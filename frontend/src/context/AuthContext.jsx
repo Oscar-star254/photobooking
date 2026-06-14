@@ -17,21 +17,26 @@ export function AuthProvider({ children }) {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         setUser(parsedUser);
       } catch (e) {
+        console.error("Error parsing saved user:", e);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
       } finally {
         setLoading(false);
       }
     } else if (token) {
+      // Token exists but no saved user, fetch profile
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       api.get("/auth/profile")
         .then(res => {
-          setUser(res.data.user);
-          localStorage.setItem("user", JSON.stringify(res.data.user));
+          const userData = res.data.user;
+          setUser(userData);
+          localStorage.setItem("user", JSON.stringify(userData));
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error("Error fetching profile:", err);
           localStorage.removeItem("token");
           localStorage.removeItem("user");
+          delete api.defaults.headers.common["Authorization"];
         })
         .finally(() => setLoading(false));
     } else {
@@ -40,23 +45,49 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const res = await api.post("/auth/login", { email, password });
-    const { token, user } = res.data;
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    setUser(user);
-    return user;
+    try {
+      const res = await api.post("/auth/login", { email, password });
+      const { token, user } = res.data;
+      
+      if (!token || !user) {
+        throw new Error("Invalid response: missing token or user data");
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      setUser(user);
+      return user;
+    } catch (error) {
+      // Clean up on failure
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      delete api.defaults.headers.common["Authorization"];
+      throw error;
+    }
   };
 
   const register = async (data) => {
-    const res = await api.post("/auth/register", data);
-    const { token, user } = res.data;
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    setUser(user);
-    return user;
+    try {
+      const res = await api.post("/auth/register", data);
+      const { token, user } = res.data;
+
+      if (!token || !user) {
+        throw new Error("Invalid response: missing token or user data");
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      setUser(user);
+      return user;
+    } catch (error) {
+      // Clean up on failure
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      delete api.defaults.headers.common["Authorization"];
+      throw error;
+    }
   };
 
   const logout = () => {
@@ -73,4 +104,10 @@ export function AuthProvider({ children }) {
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return context;
+};

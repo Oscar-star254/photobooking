@@ -13,14 +13,28 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
+    
+    // Validation
+    if (!form.full_name.trim() || !form.email.trim() || !form.phone.trim() || !form.password.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    
+    if (form.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
     setLoading(true);
     try {
       await register(form);
       toast.success("Account created! Welcome to LensKenya 🎉");
-      navigate("/dashboard");
+      // Reset form and redirect
+      setForm({ full_name: "", email: "", phone: "", password: "" });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      toast.error(err.response?.data?.error || "Registration failed.");
+      const errorMsg = err.response?.data?.error || "Registration failed. Please try again.";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

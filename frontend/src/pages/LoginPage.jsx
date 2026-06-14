@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Camera, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
@@ -9,26 +9,27 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const navigate = useNavigate();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  try {
-    const user = await login(form.email, form.password);
-    toast.success(`Welcome back, ${user.full_name.split(" ")[0]}!`);
-    // Small delay to let auth context update before redirect
-    setTimeout(() => {
-      if (user.role === "admin") {
-        window.location.href = "/admin";
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const user = await login(form.email, form.password);
+      const firstName = user?.full_name ? user.full_name.split(" ")[0] : "User";
+      toast.success(`Welcome back, ${firstName}!`);
+      // Navigate using React Router instead of window.location for better UX
+      if (user?.role === "admin") {
+        navigate("/admin", { replace: true });
       } else {
-        window.location.href = "/dashboard";
+        navigate("/dashboard", { replace: true });
       }
-    }, 500);
-  } catch (err) {
-    toast.error(err.response?.data?.error || "Login failed.");
-    setLoading(false);
-  }
-};
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || "Login failed. Please try again.";
+      toast.error(errorMsg);
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4">
