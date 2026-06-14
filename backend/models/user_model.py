@@ -4,7 +4,7 @@ import bcrypt
 class UserModel:
     @staticmethod
     def schema(email, password, full_name, phone, role="client"):
-        hashed_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        hashed_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         return {
             "email": email.lower().strip(),
             "password": hashed_pw,
@@ -19,10 +19,11 @@ class UserModel:
 
     @staticmethod
     def verify_password(plain_password, hashed_password):
-        return bcrypt.checkpw(
-            plain_password.encode("utf-8"),
-            hashed_password if isinstance(hashed_password, bytes) else hashed_password.encode("utf-8")
-        )
+        if isinstance(hashed_password, bytes):
+            hashed = hashed_password
+        else:
+            hashed = hashed_password.encode("utf-8")
+        return bcrypt.checkpw(plain_password.encode("utf-8"), hashed)
 
     @staticmethod
     def safe_user(user):

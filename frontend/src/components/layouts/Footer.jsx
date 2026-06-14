@@ -33,7 +33,9 @@ export default function Footer() {
             <ul className="space-y-2.5">
               {[["Home", "/"], ["Portfolio", "/portfolio"], ["Book a Session", "/book"], ["Sign In", "/login"]].map(([label, path]) => (
                 <li key={path}>
-                  <Link to={path} className="text-gray-400 hover:text-brand-400 text-sm font-body transition-colors">{label}</Link>
+                  <Link to={path} className="text-gray-400 hover:text-brand-400 text-sm font-body transition-colors">
+                    {label}
+                  </Link>
                 </li>
               ))}
             </ul>

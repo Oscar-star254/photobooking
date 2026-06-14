@@ -25,15 +25,25 @@ export default function RegisterPage() {
       return;
     }
 
+    // sanitize data
+    const payload = {
+      full_name: form.full_name.trim(),
+      email: form.email.toLowerCase().trim(),
+      phone: form.phone.trim(),
+      password: form.password,
+    };
+
+    if (loading) return; // prevent double submit
+
     setLoading(true);
     try {
-      await register(form);
+      await register(payload);
       toast.success("Account created! Welcome to LensKenya 🎉");
       // Reset form and redirect
       setForm({ full_name: "", email: "", phone: "", password: "" });
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      const errorMsg = err.response?.data?.error || "Registration failed. Please try again.";
+      const errorMsg = err.message || "Registration failed. Please try again.";
       toast.error(errorMsg);
     } finally {
       setLoading(false);

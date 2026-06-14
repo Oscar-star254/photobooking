@@ -63,7 +63,11 @@ export function AuthProvider({ children }) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       delete api.defaults.headers.common["Authorization"];
-      throw error;
+      // normalize error message from server
+      const serverMessage = error?.response?.data?.error || error.message || "Login failed";
+      const err = new Error(serverMessage);
+      err.original = error;
+      throw err;
     }
   };
 
@@ -86,7 +90,10 @@ export function AuthProvider({ children }) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       delete api.defaults.headers.common["Authorization"];
-      throw error;
+      const serverMessage = error?.response?.data?.error || error.message || "Registration failed";
+      const err = new Error(serverMessage);
+      err.original = error;
+      throw err;
     }
   };
 
