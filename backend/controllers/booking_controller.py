@@ -35,6 +35,7 @@ def get_my_bookings():
 
 def get_booking(booking_id):
     user_id = get_jwt_identity()
+    claims = get_jwt()
     db = get_db()
     try:
         booking = db.bookings.find_one({"_id": ObjectId(booking_id)})
@@ -42,12 +43,12 @@ def get_booking(booking_id):
         return jsonify({"error": "Invalid booking ID"}), 400
     if not booking:
         return jsonify({"error": "Booking not found"}), 404
-    if identity["role"] != "admin" and booking["user_id"] != identity["id"]:
+    if claims.get("role") != "admin" and booking["user_id"] != user_id:
         return jsonify({"error": "Access denied"}), 403
     return jsonify({"booking": BookingModel.safe_booking(booking)}), 200
 
 def cancel_booking(booking_id):
-    identity = get_jwt_identity()
+    user_id = get_jwt_identity()
     db = get_db()
     try:
         booking = db.bookings.find_one({"_id": ObjectId(booking_id)})
@@ -55,7 +56,7 @@ def cancel_booking(booking_id):
         return jsonify({"error": "Invalid booking ID"}), 400
     if not booking:
         return jsonify({"error": "Booking not found"}), 404
-    if booking["user_id"] != identity["id"]:
+    if booking["user_id"] != user_id:
         return jsonify({"error": "Access denied"}), 403
     if booking["status"] in ["completed", "cancelled"]:
         return jsonify({"error": f"Cannot cancel a {booking['status']} booking"}), 400
