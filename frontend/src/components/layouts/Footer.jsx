@@ -57,7 +57,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {[
                 [MapPin, "Nairobi, Kenya"],
-                [Phone, "+254 700 000 000"],
+                [Phone, "0758695620"],
                 [Mail, "hello@lenskenya.com"],
               ].map(([Icon, text]) => (
                 <li key={text} className="flex items-center gap-2.5 text-gray-400 text-sm">

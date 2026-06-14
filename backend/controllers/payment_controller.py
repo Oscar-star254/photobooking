@@ -58,7 +58,7 @@ def mpesa_callback():
     return jsonify({"ResultCode": 0, "ResultDesc": "Accepted"}), 200
 
 def check_payment_status():
-    identity = get_jwt_identity()
+    user_id = get_jwt_identity()
     payment_id = request.args.get("payment_id")
     if not payment_id:
         return jsonify({"error": "payment_id required"}), 400
