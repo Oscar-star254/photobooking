@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Star, Camera, Instagram, Twitter, Facebook } from "lucide-react";
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
+import Navbar from "../components/layouts/Navbar";
+import Footer from "../components/layouts/Footer";
 
 const STATS = [
   { value: "500+", label: "Sessions Done" },
