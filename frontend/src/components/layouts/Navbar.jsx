@@ -20,12 +20,11 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-dark-900/90 backdrop-blur-md border-b border-white/5">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-brand-500/20">
       <div className="page-container">
         <div className="flex items-center justify-between h-16">
-
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/30">
               <Camera className="w-5 h-5 text-white" />
             </div>
             <span className="font-display text-xl font-bold text-white">
@@ -37,7 +36,9 @@ export default function Navbar() {
             {navLinks.map((link) => (
               <Link key={link.path} to={link.path}
                 className={`px-4 py-2 rounded-lg text-sm font-body font-medium transition-colors duration-200
-                  ${isActive(link.path) ? "text-brand-400 bg-brand-500/10" : "text-gray-400 hover:text-white hover:bg-white/5"}`}>
+                  ${isActive(link.path)
+                    ? "text-brand-400 bg-brand-500/10"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"}`}>
                 {link.label}
               </Link>
             ))}
@@ -59,7 +60,7 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link to="/login"    className="btn-ghost text-sm py-2">Sign In</Link>
+                <Link to="/login" className="btn-ghost text-sm py-2">Sign In</Link>
                 <Link to="/register" className="btn-primary text-sm py-2 px-4">Get Started</Link>
               </>
             )}

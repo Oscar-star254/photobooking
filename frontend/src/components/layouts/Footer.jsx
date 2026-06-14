@@ -45,7 +45,9 @@ export default function Footer() {
             <h4 className="text-white font-display font-semibold mb-4">Services</h4>
             <ul className="space-y-2.5">
               {["Graduation Shoots", "Wedding Photography", "Portrait Sessions", "Event Coverage", "Studio Portraits"].map((s) => (
-                <li key={s}><span className="text-gray-400 text-sm font-body">{s}</span></li>
+                <li key={s}>
+                  <span className="text-gray-400 text-sm font-body">{s}</span>
+                </li>
               ))}
             </ul>
           </div>

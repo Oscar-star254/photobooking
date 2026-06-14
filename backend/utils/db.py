@@ -29,6 +29,20 @@ def init_db(app):
         _create_indexes(_db)
     except (ConnectionFailure, ServerSelectionTimeoutError, OperationFailure) as e:
         print("❌ MongoDB connection failed:", e)
+        # If running in development and a custom MONGO_URI failed, try local fallback
+        if os.getenv("FLASK_ENV") == "development" and mongo_uri != default_uri:
+            try:
+                print("Attempting fallback to localhost MongoDB for development...")
+                client = MongoClient(default_uri, serverSelectionTimeoutMS=5000)
+                client.admin.command("ping")
+                _db = client.get_database("photobooking")
+                app.db = _db
+                print("✅ MongoDB connected to localhost fallback")
+                _create_indexes(_db)
+                return
+            except Exception as e2:
+                print("Fallback to localhost failed:", e2)
+
         # Provide a hint for common deployment issue (missing/incorrect MONGO_URI)
         if mongo_uri == default_uri:
             print(
