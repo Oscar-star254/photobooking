@@ -5,7 +5,7 @@ import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 
-function PaymentModal({ booking, onClose, onSuccess }) {
+function PaymentModal({ booking, galleryTitle, onClose, onSuccess }) {
   const { user } = useAuth();
   const [phone, setPhone]     = useState(user?.phone || "");
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ function PaymentModal({ booking, onClose, onSuccess }) {
         } else if (res.data.status === "failed") {
           clearInterval(interval);
           setPolling(false);
-          toast.error("Payment failed or cancelled.");
+          toast.error("Payment failed or cancelled. Try again.");
         }
       } catch (e) {}
       if (attempts >= 30) {
@@ -38,11 +38,14 @@ function PaymentModal({ booking, onClose, onSuccess }) {
 
   const initiatePay = async () => {
     if (!phone) { toast.error("Enter your M-Pesa phone number"); return; }
+    if (!booking) { toast.error("Booking information not found"); return; }
+    if (!booking.id) { toast.error("Invalid booking ID"); return; }
+
     setLoading(true);
     try {
       const res = await api.post("/payments/initiate", {
-        booking_id: booking.booking_id,
-        phone,
+        booking_id: booking.id,
+        phone: phone,
       });
       setLoading(false);
       setPolling(true);
@@ -58,8 +61,11 @@ function PaymentModal({ booking, onClose, onSuccess }) {
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
       <div className="bg-dark-700 border border-white/10 rounded-2xl p-6 w-full max-w-sm">
         <h3 className="font-display text-xl font-bold text-white mb-1">Pay with M-Pesa</h3>
-        <p className="text-gray-400 text-sm font-body mb-6">
-          KES {booking?.package_price?.toLocaleString()} for {booking?.title}
+        <p className="text-gray-400 text-sm font-body mb-2">
+          {galleryTitle}
+        </p>
+        <p className="text-brand-400 font-body font-semibold mb-6">
+          KES {booking?.package_price?.toLocaleString()}
         </p>
 
         {!polling ? (
@@ -77,10 +83,15 @@ function PaymentModal({ booking, onClose, onSuccess }) {
                 You'll receive a payment prompt on your phone
               </p>
             </div>
-            <button onClick={initiatePay} disabled={loading} className="btn-primary w-full mb-3">
+            <button
+              onClick={initiatePay}
+              disabled={loading}
+              className="btn-primary w-full mb-3">
               {loading ? "Sending STK Push..." : `Pay KES ${booking?.package_price?.toLocaleString()}`}
             </button>
-            <button onClick={onClose} className="w-full text-center text-sm text-gray-400 hover:text-white py-2">
+            <button
+              onClick={onClose}
+              className="w-full text-center text-sm text-gray-400 hover:text-white py-2">
               Cancel
             </button>
           </>
@@ -124,8 +135,12 @@ export default function GalleryView() {
   useEffect(() => {
     if (gallery?.booking_id) {
       api.get(`/bookings/${gallery.booking_id}`)
-        .then(r => setBooking(r.data.booking))
-        .catch(() => {});
+        .then(r => {
+          setBooking(r.data.booking);
+        })
+        .catch(() => {
+          toast.error("Could not load booking details");
+        });
     }
   }, [gallery]);
 
@@ -167,7 +182,8 @@ export default function GalleryView() {
 
       {showPayment && booking && (
         <PaymentModal
-          booking={{ ...booking, title: gallery.title }}
+          booking={booking}
+          galleryTitle={gallery?.title}
           onClose={() => setShowPayment(false)}
           onSuccess={() => { setShowPayment(false); fetchGallery(); }}
         />
@@ -203,13 +219,21 @@ export default function GalleryView() {
             <Download className="w-4 h-4" /> Download All (ZIP)
           </button>
         ) : (
-          <button onClick={() => setShowPayment(true)} className="btn-primary flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (!booking) {
+                toast.error("Booking details not loaded yet. Please wait.");
+                return;
+              }
+              setShowPayment(true);
+            }}
+            className="btn-primary flex items-center gap-2">
             <CreditCard className="w-4 h-4" /> Pay with M-Pesa to Unlock
           </button>
         )}
       </div>
 
-      {/* Lock / unlock banner */}
+      {/* Lock banner */}
       {!gallery?.is_paid && (
         <div className="bg-brand-500/10 border border-brand-500/20 rounded-xl p-5 mb-8 flex items-center gap-4">
           <Lock className="w-6 h-6 text-brand-400 shrink-0" />
@@ -222,11 +246,22 @@ export default function GalleryView() {
         </div>
       )}
 
+      {/* Unlocked banner */}
       {gallery?.is_paid && (
         <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-8 flex items-center gap-3">
           <CheckCircle className="w-5 h-5 text-green-400" />
           <p className="text-green-300 font-body text-sm font-medium">
             Gallery unlocked — download your full-resolution photos below.
+          </p>
+        </div>
+      )}
+
+      {/* Booking info */}
+      {booking && !gallery?.is_paid && (
+        <div className="card mb-6">
+          <p className="text-gray-400 text-sm font-body">
+            <span className="text-white font-medium">Package:</span> {booking.package_name} —{" "}
+            <span className="text-brand-400 font-semibold">KES {booking.package_price?.toLocaleString()}</span>
           </p>
         </div>
       )}
