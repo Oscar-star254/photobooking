@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "https://photobooking-2-d4nb.onrender.com/api",
+baseURL: "https://photobooking-2-d4nb.onrender.com/api",
   timeout: 30000,
 });
 
