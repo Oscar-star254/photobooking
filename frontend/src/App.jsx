@@ -23,7 +23,7 @@ import AdminGallery    from "./pages/admin/AdminGallery";
 function WhatsAppButton() {
   return (
     
-      href="https://wa.me/254700000000?text=Hi%20LensKenya!%20I'd%20like%20to%20book%20a%20photography%20session."
+      href="https://wa.me/254758695620?text=Hi%20LensKenya!%20I'd%20like%20to%20book%20a%20photography%20session."
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 right-6 z-50 flex items-center gap-2 group"
