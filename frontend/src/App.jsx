@@ -21,15 +21,36 @@ import AdminClients    from "./pages/admin/AdminClients";
 import AdminGallery    from "./pages/admin/AdminGallery";
 
 function WhatsAppButton() {
+  const phone = "254700000000";
+  const message = "Hi LensKenya! I'd like to book a photography session.";
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
   return (
     
-      href="https://wa.me/254758695620?text=Hi%20LensKenya!%20I'd%20like%20to%20book%20a%20photography%20session."
+      href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-2 group"
+      style={{
+        position: "fixed",
+        bottom: "24px",
+        right: "24px",
+        zIndex: 9999,
+        width: "56px",
+        height: "56px",
+        backgroundColor: "#25D366",
+        borderRadius: "50%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0 4px 20px rgba(37,211,102,0.4)",
+        textDecoration: "none",
+      }}
     >
-      <span className="hidden group-hover:flex bg-white text-gray-800 text-sm font-body font-medium px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
-        Chat with us!
-      </span>
-      <div className="w-14 h-14 bg-green-500 hover:bg-green-400 rounded-full flex items-center justify-center shadow-xl shadow-green-500/30 transition-all duration-200 hover:scale-110">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+        alt="WhatsApp"
+        style={{ width: "32px", height: "32px" }}
+      />
+    </a>
+  );
+}
