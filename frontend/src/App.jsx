@@ -18,7 +18,6 @@ import AdminDashboard  from "./pages/admin/AdminDashboard";
 import AdminBookings   from "./pages/admin/AdminBookings";
 import AdminClients    from "./pages/admin/AdminClients";
 import AdminGallery    from "./pages/admin/AdminGallery";
-import WhatsAppButton from "./components/WhatsAppButton";
 
 function AppRoutes() {
   const { loading } = useAuth();
