@@ -20,7 +20,7 @@ import AdminGallery from "./pages/admin/AdminGallery";
 function WhatsAppButton() {
   return (
     
-      href="https://wa.me/254700000000"
+      href="https://wa.me/254758695620"
       target="_blank"
       rel="noopener noreferrer"
       style={{
