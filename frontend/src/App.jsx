@@ -20,12 +20,30 @@ import AdminGallery from "./pages/admin/AdminGallery";
 function WhatsAppButton() {
   return (
     
-      href="https://wa.me/254758695620"
+      href="https://wa.me/254700000000"
       target="_blank"
       rel="noopener noreferrer"
-      style={{position:"fixed",bottom:"24px",right:"24px",zIndex:9999,width:"56px",height:"56px",backgroundColor:"#25D366",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(37,211,102,0.4)",textDecoration:"none"}}
+      style={{
+        position: "fixed",
+        bottom: "24px",
+        right: "24px",
+        zIndex: 9999,
+        width: "56px",
+        height: "56px",
+        backgroundColor: "#25D366",
+        borderRadius: "50%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0 4px 20px rgba(37,211,102,0.4)",
+        textDecoration: "none"
+      }}
     >
-      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" style={{width:"32px",height:"32px"}} />
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+        alt="WhatsApp"
+        style={{ width: "32px", height: "32px" }}
+      />
     </a>
   );
 }
@@ -50,14 +68,30 @@ function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/reviews" element={<ReviewPage />} />
-        <Route path="/dashboard" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
-        <Route path="/dashboard/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
-        <Route path="/dashboard/galleries" element={<ProtectedRoute><MyGallery /></ProtectedRoute>} />
-        <Route path="/dashboard/gallery/:galleryId" element={<ProtectedRoute><GalleryView /></ProtectedRoute>} />
-        <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/bookings" element={<ProtectedRoute role="admin"><AdminBookings /></ProtectedRoute>} />
-        <Route path="/admin/clients" element={<ProtectedRoute role="admin"><AdminClients /></ProtectedRoute>} />
-        <Route path="/admin/gallery/:bookingId" element={<ProtectedRoute role="admin"><AdminGallery /></ProtectedRoute>} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute><ClientDashboard /></ProtectedRoute>
+        } />
+        <Route path="/dashboard/bookings" element={
+          <ProtectedRoute><MyBookings /></ProtectedRoute>
+        } />
+        <Route path="/dashboard/galleries" element={
+          <ProtectedRoute><MyGallery /></ProtectedRoute>
+        } />
+        <Route path="/dashboard/gallery/:galleryId" element={
+          <ProtectedRoute><GalleryView /></ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>
+        } />
+        <Route path="/admin/bookings" element={
+          <ProtectedRoute role="admin"><AdminBookings /></ProtectedRoute>
+        } />
+        <Route path="/admin/clients" element={
+          <ProtectedRoute role="admin"><AdminClients /></ProtectedRoute>
+        } />
+        <Route path="/admin/gallery/:bookingId" element={
+          <ProtectedRoute role="admin"><AdminGallery /></ProtectedRoute>
+        } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <WhatsAppButton />
