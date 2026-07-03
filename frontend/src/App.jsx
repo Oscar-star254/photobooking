@@ -20,7 +20,7 @@ import AdminGallery from "./pages/admin/AdminGallery";
 function WhatsAppButton() {
   return (
     
-      href="https://wa.me/254700000000"
+      href="https://wa.me/254758695620"
       target="_blank"
       rel="noopener noreferrer"
       style={{position:"fixed",bottom:"24px",right:"24px",zIndex:9999,width:"56px",height:"56px",backgroundColor:"#25D366",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(37,211,102,0.4)",textDecoration:"none"}}
