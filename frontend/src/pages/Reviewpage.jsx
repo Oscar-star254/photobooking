@@ -12,7 +12,9 @@ export default function ReviewPage() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    api.get("/reviews").then(r => setReviews(r.data.reviews)).catch(() => {});
+    api.get("/reviews")
+      .then(r => setReviews(r.data.reviews))
+      .catch(() => {});
   }, []);
 
   const handleSubmit = async (e) => {
@@ -21,7 +23,7 @@ export default function ReviewPage() {
     setLoading(true);
     try {
       await api.post("/reviews", form);
-      toast.success("Review submitted! Thank you 🎉");
+      toast.success("Review submitted! Thank you");
       setSubmitted(true);
     } catch (err) {
       toast.error(err.response?.data?.error || "Failed to submit review");
@@ -42,8 +44,12 @@ export default function ReviewPage() {
               <div>
                 <label className="label">Rating</label>
                 <div className="flex gap-2">
-                  {[1,2,3,4,5].map((star) => (
-                    <button key={star} type="button" onClick={() => setForm({...form, rating: star})}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setForm({ ...form, rating: star })}
+                    >
                       <Star className={`w-8 h-8 transition-colors ${star <= form.rating ? "fill-brand-400 text-brand-400" : "text-gray-600"}`} />
                     </button>
                   ))}
@@ -51,8 +57,12 @@ export default function ReviewPage() {
               </div>
               <div>
                 <label className="label">Package</label>
-                <select value={form.package_name} onChange={e => setForm({...form, package_name: e.target.value})}
-                  className="input-field" required>
+                <select
+                  value={form.package_name}
+                  onChange={e => setForm({ ...form, package_name: e.target.value })}
+                  className="input-field"
+                  required
+                >
                   <option value="">Select package</option>
                   <option value="Graduation Shoot">Graduation Shoot</option>
                   <option value="Wedding Shoot">Wedding Shoot</option>
@@ -63,9 +73,14 @@ export default function ReviewPage() {
               </div>
               <div>
                 <label className="label">Your Review</label>
-                <textarea value={form.comment} onChange={e => setForm({...form, comment: e.target.value})}
-                  className="input-field resize-none" rows={4}
-                  placeholder="Tell us about your experience..." required />
+                <textarea
+                  value={form.comment}
+                  onChange={e => setForm({ ...form, comment: e.target.value })}
+                  className="input-field resize-none"
+                  rows={4}
+                  placeholder="Tell us about your experience..."
+                  required
+                />
               </div>
               <button type="submit" disabled={loading} className="btn-primary w-full">
                 {loading ? "Submitting..." : "Submit Review"}
@@ -81,27 +96,33 @@ export default function ReviewPage() {
         )}
 
         <h2 className="font-display text-2xl font-bold text-white mb-6">Client Reviews</h2>
-        <div className="space-y-4">
-          {reviews.map((r, i) => (
-            <div key={i} className="card">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-brand-500/20 rounded-full flex items-center justify-center">
-                  <span className="text-brand-400 font-bold">{r.full_name?.charAt(0)}</span>
+        {reviews.length === 0 ? (
+          <div className="card text-center py-10">
+            <p className="text-gray-400 font-body">No reviews yet. Be the first!</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {reviews.map((r, i) => (
+              <div key={i} className="card">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-brand-500/20 rounded-full flex items-center justify-center">
+                    <span className="text-brand-400 font-bold">{r.full_name?.charAt(0)}</span>
+                  </div>
+                  <div>
+                    <div className="text-white font-body font-medium">{r.full_name}</div>
+                    <div className="text-gray-500 text-xs font-body">{r.package_name}</div>
+                  </div>
+                  <div className="ml-auto flex gap-1">
+                    {Array.from({ length: r.rating }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-brand-400 text-brand-400" />
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <div className="text-white font-body font-medium">{r.full_name}</div>
-                  <div className="text-gray-500 text-xs">{r.package_name}</div>
-                </div>
-                <div className="ml-auto flex gap-1">
-                  {Array.from({length: r.rating}).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-brand-400 text-brand-400" />
-                  ))}
-                </div>
+                <p className="text-gray-300 text-sm font-body">"{r.comment}"</p>
               </div>
-              <p className="text-gray-300 text-sm font-body">"{r.comment}"</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
