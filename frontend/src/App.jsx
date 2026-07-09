@@ -1,3 +1,4 @@
+import ContactPage from "./pages/ContactPage";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -54,6 +55,7 @@ function AppRoutes() {
   return (
     <>
       <Routes>
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
         <Route path="/book" element={<BookingPage />} />
