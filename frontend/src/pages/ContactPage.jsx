@@ -6,25 +6,20 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-dark-900">
       <Navbar />
-
       <div className="pt-28 pb-20">
         <div className="page-container">
 
-          {/* Header */}
           <div className="text-center mb-14">
             <span className="text-brand-400 font-body text-sm font-medium uppercase tracking-widest">Get In Touch</span>
             <h1 className="section-title mt-2">Contact Us</h1>
             <p className="section-subtitle mx-auto">
-              Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+              Have questions? Send us a message and we will respond as soon as possible.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-            {/* Left — Contact Info */}
             <div className="space-y-6">
-
-              {/* Info Cards */}
               <div className="card">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-brand-500/10 rounded-xl flex items-center justify-center shrink-0">
@@ -61,8 +56,10 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-display font-semibold text-white mb-0.5">Location</h3>
                     <p className="text-gray-400 font-body text-sm">
-                      Nairobi, Kenya<br />
-                      <span className="text-gray-500 text-xs">We come to you — shoots at your preferred location</span>
+                      Nairobi, Kenya
+                    </p>
+                    <p className="text-gray-500 text-xs font-body">
+                      We come to you — shoots at your preferred location
                     </p>
                   </div>
                 </div>
@@ -75,15 +72,12 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-display font-semibold text-white mb-0.5">Working Hours</h3>
-                    <p className="text-gray-400 font-body text-sm">
-                      Mon – Sat: 7:00 AM – 7:00 PM<br />
-                      Sunday: By appointment only
-                    </p>
+                    <p className="text-gray-400 font-body text-sm">Mon to Sat: 7:00 AM to 7:00 PM</p>
+                    <p className="text-gray-500 text-xs font-body">Sunday: By appointment only</p>
                   </div>
                 </div>
               </div>
 
-              {/* WhatsApp CTA */}
               
                 href="https://wa.me/254758695620?text=Hi%20LensKenya!%20I'd%20like%20to%20inquire%20about%20a%20photography%20session."
                 target="_blank"
@@ -104,14 +98,11 @@ export default function ContactPage() {
               </a>
             </div>
 
-            {/* Right — Map + Contact Form */}
             <div className="space-y-6">
-
-              {/* Google Map */}
               <div className="rounded-xl overflow-hidden border border-white/5" style={{ height: "280px" }}>
                 <iframe
                   title="LensKenya Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.0175422220843!2d37.00946!3d-1.0993!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f4f8c9b7e4e6b%3A0x8b7e4e6b7e4e6b7e!2sJKUAT%2C%20Juja!5e0!3m2!1sen!2ske!4v1620000000000!5m2!1sen!2ske"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d255282.35853743787!2d36.68258485!3d-1.3028617999999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1172d84d49a7%3A0xf7cf0254b297924c!2sNairobi%2C%20Kenya!5e0!3m2!1sen!2ske!4v1620000000000!5m2!1sen!2ske"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -121,13 +112,14 @@ export default function ContactPage() {
                 />
               </div>
 
-              {/* Contact Form */}
               <div className="card">
                 <h3 className="font-display text-lg font-semibold text-white mb-5">Send us a Message</h3>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    window.location.href = "https://wa.me/254758695620?text=Hi%20LensKenya!%20I'd%20like%20to%20inquire%20about%20a%20session.";
+                    const name = e.target[0].value;
+                    const msg = `Hi LensKenya! My name is ${name}. I'd like to inquire about a photography session.`;
+                    window.open("https://wa.me/254758695620?text=" + encodeURIComponent(msg), "_blank");
                   }}
                   className="space-y-4"
                 >
@@ -160,10 +152,10 @@ export default function ContactPage() {
                 </form>
               </div>
             </div>
+
           </div>
         </div>
       </div>
-
       <Footer />
     </div>
   );
