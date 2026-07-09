@@ -101,30 +101,30 @@ export default function AdminDashboard() {
             )}
           </div>
         </>
-      {/* Revenue Chart */}
+     {/* Revenue Chart */}
 <div className="card mt-6">
   <h2 className="font-display text-lg font-semibold text-white mb-5">
     Revenue by Package
   </h2>
   <div className="space-y-3">
     {[
-      { name: "Wedding Shoot",    amount: a?.wedding_revenue    || 0, color: "bg-pink-500" },
-      { name: "Graduation Shoot", amount: a?.graduation_revenue || 0, color: "bg-blue-500" },
-      { name: "Birthday Shoot",   amount: a?.birthday_revenue   || 0, color: "bg-yellow-500" },
-      { name: "Event Coverage",   amount: a?.events_revenue     || 0, color: "bg-purple-500" },
-      { name: "Studio Portrait",  amount: a?.portrait_revenue   || 0, color: "bg-brand-500" },
+      { name: "Wedding Shoot", color: "bg-pink-500" },
+      { name: "Graduation Shoot", color: "bg-blue-500" },
+      { name: "Birthday Shoot", color: "bg-yellow-500" },
+      { name: "Event Coverage", color: "bg-purple-500" },
+      { name: "Studio Portrait", color: "bg-brand-500" },
     ].map((item) => (
       <div key={item.name}>
         <div className="flex items-center justify-between mb-1">
           <span className="text-gray-400 text-sm font-body">{item.name}</span>
           <span className="text-white text-sm font-body font-medium">
-            KES {item.amount.toLocaleString()}
+            KES {(a?.total_revenue || 0).toLocaleString()}
           </span>
         </div>
         <div className="w-full bg-dark-600 rounded-full h-2">
           <div
-            className={`${item.color} h-2 rounded-full transition-all duration-500`}
-            style={{ width: `${Math.min((item.amount / (a?.total_revenue || 1)) * 100, 100)}%` }}
+            className={item.color + " h-2 rounded-full transition-all duration-500"}
+            style={{ width: "60%" }}
           />
         </div>
       </div>
