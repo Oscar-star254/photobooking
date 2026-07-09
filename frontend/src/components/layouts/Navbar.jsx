@@ -12,10 +12,11 @@ export default function Navbar() {
   const handleLogout = () => { logout(); navigate("/"); };
 
   const navLinks = [
-    { label: "Home",      path: "/" },
-    { label: "Portfolio", path: "/portfolio" },
-    { label: "Book Now",  path: "/book" },
-  ];
+  { label: "Home",      path: "/" },
+  { label: "Portfolio", path: "/portfolio" },
+  { label: "Book Now",  path: "/book" },
+  { label: "Contact",   path: "/contact" },
+];
 
   const isActive = (path) => location.pathname === path;
 
