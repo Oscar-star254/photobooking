@@ -13,7 +13,7 @@ const STATUS_BADGE = {
 };
 
 export default function AdminDashboard() {
-  const [data, setData]     = useState(null);
+  const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,14 +26,22 @@ export default function AdminDashboard() {
   const a = data?.analytics;
 
   const CARDS = [
-    { label: "Total Bookings",    value: a?.total_bookings,    icon: Calendar,    color: "text-blue-400",    bg: "bg-blue-500/10" },
-    { label: "Total Clients",     value: a?.total_clients,     icon: Users,       color: "text-purple-400",  bg: "bg-purple-500/10" },
-    { label: "Total Revenue",     value: a ? `KES ${(a.total_revenue || 0).toLocaleString()}` : "—", icon: DollarSign, color: "text-green-400", bg: "bg-green-500/10" },
-    { label: "Pending Bookings",  value: a?.pending_bookings,  icon: Clock,       color: "text-yellow-400",  bg: "bg-yellow-500/10" },
-    { label: "Confirmed",         value: a?.confirmed_bookings,icon: CheckCircle, color: "text-brand-400",   bg: "bg-brand-500/10" },
-    { label: "Total Galleries",   value: a?.total_galleries,   icon: Image,       color: "text-pink-400",    bg: "bg-pink-500/10" },
-    { label: "Photos Stored",     value: a?.total_photos,      icon: Camera,      color: "text-cyan-400",    bg: "bg-cyan-500/10" },
-    { label: "Completed Sessions",value: a?.completed_bookings,icon: TrendingUp,  color: "text-emerald-400", bg: "bg-emerald-500/10" },
+    { label: "Total Bookings",     value: a?.total_bookings,     icon: Calendar,    color: "text-blue-400",    bg: "bg-blue-500/10" },
+    { label: "Total Clients",      value: a?.total_clients,      icon: Users,       color: "text-purple-400",  bg: "bg-purple-500/10" },
+    { label: "Total Revenue",      value: a ? `KES ${(a.total_revenue || 0).toLocaleString()}` : "—", icon: DollarSign, color: "text-green-400", bg: "bg-green-500/10" },
+    { label: "Pending Bookings",   value: a?.pending_bookings,   icon: Clock,       color: "text-yellow-400",  bg: "bg-yellow-500/10" },
+    { label: "Confirmed",          value: a?.confirmed_bookings, icon: CheckCircle, color: "text-brand-400",   bg: "bg-brand-500/10" },
+    { label: "Total Galleries",    value: a?.total_galleries,    icon: Image,       color: "text-pink-400",    bg: "bg-pink-500/10" },
+    { label: "Photos Stored",      value: a?.total_photos,       icon: Camera,      color: "text-cyan-400",    bg: "bg-cyan-500/10" },
+    { label: "Completed Sessions", value: a?.completed_bookings, icon: TrendingUp,  color: "text-emerald-400", bg: "bg-emerald-500/10" },
+  ];
+
+  const PACKAGES = [
+    { name: "Wedding Shoot",    color: "bg-pink-500" },
+    { name: "Graduation Shoot", color: "bg-blue-500" },
+    { name: "Birthday Shoot",   color: "bg-yellow-500" },
+    { name: "Event Coverage",   color: "bg-purple-500" },
+    { name: "Studio Portrait",  color: "bg-brand-500" },
   ];
 
   return (
@@ -49,6 +57,7 @@ export default function AdminDashboard() {
         </div>
       ) : (
         <>
+          {/* Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
             {CARDS.map((c) => (
               <div key={c.label} className="card">
@@ -61,6 +70,7 @@ export default function AdminDashboard() {
             ))}
           </div>
 
+          {/* Quick Actions */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
             <Link to="/admin/bookings" className="card hover:border-brand-500/30 hover:bg-dark-600 transition-all cursor-pointer">
               <Calendar className="w-6 h-6 text-brand-400 mb-3" />
@@ -79,7 +89,8 @@ export default function AdminDashboard() {
             </Link>
           </div>
 
-          <div className="card">
+          {/* Recent Bookings */}
+          <div className="card mb-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-display text-lg font-semibold text-white">Recent Bookings</h2>
               <Link to="/admin/bookings" className="text-brand-400 text-sm font-body hover:text-brand-300">View all →</Link>
@@ -100,37 +111,30 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
+
+          {/* Revenue Chart */}
+          <div className="card">
+            <h2 className="font-display text-lg font-semibold text-white mb-5">Revenue by Package</h2>
+            <div className="space-y-3">
+              {PACKAGES.map((item) => (
+                <div key={item.name}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-gray-400 text-sm font-body">{item.name}</span>
+                    <span className="text-white text-sm font-body font-medium">
+                      KES {(a?.total_revenue || 0).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="w-full bg-dark-600 rounded-full h-2">
+                    <div
+                      className={item.color + " h-2 rounded-full transition-all duration-500"}
+                      style={{ width: "60%" }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </>
-     {/* Revenue Chart */}
-<div className="card mt-6">
-  <h2 className="font-display text-lg font-semibold text-white mb-5">
-    Revenue by Package
-  </h2>
-  <div className="space-y-3">
-    {[
-      { name: "Wedding Shoot", color: "bg-pink-500" },
-      { name: "Graduation Shoot", color: "bg-blue-500" },
-      { name: "Birthday Shoot", color: "bg-yellow-500" },
-      { name: "Event Coverage", color: "bg-purple-500" },
-      { name: "Studio Portrait", color: "bg-brand-500" },
-    ].map((item) => (
-      <div key={item.name}>
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-gray-400 text-sm font-body">{item.name}</span>
-          <span className="text-white text-sm font-body font-medium">
-            KES {(a?.total_revenue || 0).toLocaleString()}
-          </span>
-        </div>
-        <div className="w-full bg-dark-600 rounded-full h-2">
-          <div
-            className={item.color + " h-2 rounded-full transition-all duration-500"}
-            style={{ width: "60%" }}
-          />
-        </div>
-      </div>
-    ))}
-  </div>
-</div>
       )}
     </AdminLayout>
   );
