@@ -16,36 +16,28 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminBookings from "./pages/admin/AdminBookings";
 import AdminClients from "./pages/admin/AdminClients";
 import AdminGallery from "./pages/admin/AdminGallery";
+import { useEffect } from "react";
 
 function WhatsAppButton() {
-  return (
-    
-      href="https://wa.me/254758695620"
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        position: "fixed",
-        bottom: "24px",
-        right: "24px",
-        zIndex: 9999,
-        width: "56px",
-        height: "56px",
-        backgroundColor: "#25D366",
-        borderRadius: "50%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxShadow: "0 4px 20px rgba(37,211,102,0.4)",
-        textDecoration: "none"
-      }}
-    >
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-        alt="WhatsApp"
-        style={{ width: "32px", height: "32px" }}
-      />
-    </a>
-  );
+  useEffect(() => {
+    const btn = document.createElement("a");
+    btn.href = "https://wa.me/254758695620";
+    btn.target = "_blank";
+    btn.rel = "noopener noreferrer";
+    btn.id = "whatsapp-btn";
+    btn.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:9999;width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,0.4);text-decoration:none;";
+    const img = document.createElement("img");
+    img.src = "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg";
+    img.alt = "WhatsApp";
+    img.style.cssText = "width:32px;height:32px;";
+    btn.appendChild(img);
+    document.body.appendChild(btn);
+    return () => {
+      const el = document.getElementById("whatsapp-btn");
+      if (el) el.remove();
+    };
+  }, []);
+  return null;
 }
 
 function AppRoutes() {
