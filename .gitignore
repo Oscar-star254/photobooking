@@ -1,19 +1,7 @@
-# Python
-venv/
-__pycache__/
-*.pyc
-
-# Environment variables
-.env
-
-# Node
+node_modules/
 frontend/node_modules/
-
-# React build
-frontend/build/
-
-# VS Code
-.vscode/
-
-# Logs
-*.log
+backend/__pycache__/
+backend/.env
+frontend/.env.local
+.env
+*.pyc
