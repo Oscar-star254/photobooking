@@ -1,22 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Camera, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, Camera, LogOut, LayoutDashboard, Download } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstall, setShowInstall] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstall(true);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const result = await installPrompt.userChoice;
+    if (result.outcome === "accepted") {
+      setShowInstall(false);
+      setInstallPrompt(null);
+    }
+  };
+
   const handleLogout = () => { logout(); navigate("/"); };
 
   const navLinks = [
-  { label: "Home",      path: "/" },
-  { label: "Portfolio", path: "/portfolio" },
-  { label: "Book Now",  path: "/book" },
-  { label: "Contact",   path: "/contact" },
-];
+    { label: "Home",      path: "/" },
+    { label: "Portfolio", path: "/portfolio" },
+    { label: "Book Now",  path: "/book" },
+    { label: "Contact",   path: "/contact" },
+  ];
 
   const isActive = (path) => location.pathname === path;
 
@@ -24,6 +46,7 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-brand-500/20">
       <div className="page-container">
         <div className="flex items-center justify-between h-16">
+
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/30">
               <Camera className="w-5 h-5 text-white" />
@@ -46,6 +69,15 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
+            {showInstall && (
+              <button
+                onClick={handleInstall}
+                className="flex items-center gap-1.5 text-xs bg-brand-500/10 border border-brand-500/30 text-brand-400 px-3 py-1.5 rounded-lg hover:bg-brand-500/20 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Install App
+              </button>
+            )}
             {user ? (
               <>
                 <Link to={user.role === "admin" ? "/admin" : "/dashboard"}
@@ -82,6 +114,17 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+
+            {showInstall && (
+              <button
+                onClick={handleInstall}
+                className="mx-4 mt-2 flex items-center justify-center gap-2 bg-brand-500/10 border border-brand-500/30 text-brand-400 px-4 py-2.5 rounded-lg text-sm font-body font-medium"
+              >
+                <Download className="w-4 h-4" />
+                Install App on Phone
+              </button>
+            )}
+
             <div className="border-t border-white/5 mt-2 pt-2">
               {user ? (
                 <>
