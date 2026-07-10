@@ -62,3 +62,20 @@ def cancel_booking(booking_id):
         return jsonify({"error": f"Cannot cancel a {booking['status']} booking"}), 400
     db.bookings.update_one({"_id": ObjectId(booking_id)}, {"$set": {"status": "cancelled", "updated_at": datetime.now(timezone.utc)}})
     return jsonify({"message": "Booking cancelled successfully"}), 200
+
+def get_booked_dates():
+    db = get_db()
+    bookings = list(db.bookings.find(
+        {"status": {"$in": ["pending", "confirmed"]}},
+        {"booking_date": 1, "_id": 0}
+    ))
+
+    booked_dates = []
+    for b in bookings:
+        if b.get("booking_date"):
+            date = b["booking_date"]
+            booked_dates.append(
+                date.strftime("%Y-%m-%d") if hasattr(date, "strftime") else str(date)[:10]
+            )
+
+    return jsonify({"booked_dates": booked_dates}), 200
