@@ -1,12 +1,5 @@
 const CACHE_NAME = "lenskenya-v1";
-const urlsToCache = [
-  "/",
-  "/index.html",
-  "/portfolio",
-  "/book",
-  "/login",
-  "/register",
-];
+const urlsToCache = ["/", "/index.html", "/portfolio", "/book", "/login", "/register"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -18,9 +11,7 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) return response;
-      return fetch(event.request).catch(() =>
-        caches.match("/index.html")
-      );
+      return fetch(event.request).catch(() => caches.match("/index.html"));
     })
   );
 });

@@ -10,7 +10,6 @@ root.render(
   </React.StrictMode>
 );
 
-// Register Service Worker for PWA
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
@@ -20,9 +19,8 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-// Keep backend alive
 setInterval(() => {
   fetch("https://photobooking-2-d4nb.onrender.com/api/health")
-    .then(() => console.log("Backend alive"))
+    .then(() => {})
     .catch(() => {});
 }, 10 * 60 * 1000);
