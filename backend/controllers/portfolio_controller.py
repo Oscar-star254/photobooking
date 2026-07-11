@@ -36,7 +36,10 @@ def get_portfolio():
 
 def upload_portfolio_photo():
     identity = get_jwt_identity()
-    if identity["role"] != "admin":
+claims = get_jwt()
+
+if claims.get("role") != "admin":
+    return jsonify({"error": "Admin access required"}), 403
         return jsonify({"error": "Admin access required"}), 403
 
     db = get_db()
@@ -80,7 +83,10 @@ def upload_portfolio_photo():
 
 def delete_portfolio_photo(photo_id):
     identity = get_jwt_identity()
-    if identity["role"] != "admin":
+claims = get_jwt()
+
+if claims.get("role") != "admin":
+    return jsonify({"error": "Admin access required"}), 403
         return jsonify({"error": "Admin access required"}), 403
 
     db = get_db()
