@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 import os
+from routes.portfolio_routes import portfolio_bp
 
 load_dotenv()
 
@@ -39,7 +40,8 @@ def create_app():
     app.register_blueprint(gallery_bp, url_prefix="/api/galleries")
     app.register_blueprint(photo_bp,   url_prefix="/api/photos")
     app.register_blueprint(admin_bp,   url_prefix="/api/admin")
-
+    app.register_blueprint(portfolio_bp, url_prefix="/api/portfolio")
+    
     @app.route("/api/health")
     def health():
         return {"status": "ok", "message": "LensKenya API is running"}, 200

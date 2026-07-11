@@ -1,23 +1,27 @@
-import ContactPage from "./pages/ContactPage";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import LandingPage from "./pages/LandingPage";
-import PortfolioPage from "./pages/PortfolioPage";
-import BookingPage from "./pages/BookingPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import ReviewPage from "./pages/ReviewPage";
-import ClientDashboard from "./pages/client/ClientDashboard";
-import MyBookings from "./pages/client/MyBookings";
-import MyGallery from "./pages/client/MyGallery";
-import GalleryView from "./pages/client/GalleryView";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminBookings from "./pages/admin/AdminBookings";
-import AdminClients from "./pages/admin/AdminClients";
-import AdminGallery from "./pages/admin/AdminGallery";
 import { useEffect } from "react";
+
+import LandingPage     from "./pages/LandingPage";
+import PortfolioPage   from "./pages/PortfolioPage";
+import BookingPage     from "./pages/BookingPage";
+import LoginPage       from "./pages/LoginPage";
+import RegisterPage    from "./pages/RegisterPage";
+import ReviewPage      from "./pages/ReviewPage";
+import ContactPage     from "./pages/ContactPage";
+
+import ClientDashboard from "./pages/client/ClientDashboard";
+import MyBookings      from "./pages/client/MyBookings";
+import MyGallery       from "./pages/client/MyGallery";
+import GalleryView     from "./pages/client/GalleryView";
+
+import AdminDashboard  from "./pages/admin/AdminDashboard";
+import AdminBookings   from "./pages/admin/AdminBookings";
+import AdminClients    from "./pages/admin/AdminClients";
+import AdminGallery    from "./pages/admin/AdminGallery";
+import AdminPortfolio  from "./pages/admin/AdminPortfolio";
 
 function WhatsAppButton() {
   useEffect(() => {
@@ -55,13 +59,16 @@ function AppRoutes() {
   return (
     <>
       <Routes>
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/" element={<LandingPage />} />
+        {/* Public */}
+        <Route path="/"          element={<LandingPage />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
-        <Route path="/book" element={<BookingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/reviews" element={<ReviewPage />} />
+        <Route path="/book"      element={<BookingPage />} />
+        <Route path="/login"     element={<LoginPage />} />
+        <Route path="/register"  element={<RegisterPage />} />
+        <Route path="/reviews"   element={<ReviewPage />} />
+        <Route path="/contact"   element={<ContactPage />} />
+
+        {/* Client */}
         <Route path="/dashboard" element={
           <ProtectedRoute><ClientDashboard /></ProtectedRoute>
         } />
@@ -74,6 +81,8 @@ function AppRoutes() {
         <Route path="/dashboard/gallery/:galleryId" element={
           <ProtectedRoute><GalleryView /></ProtectedRoute>
         } />
+
+        {/* Admin */}
         <Route path="/admin" element={
           <ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>
         } />
@@ -86,6 +95,10 @@ function AppRoutes() {
         <Route path="/admin/gallery/:bookingId" element={
           <ProtectedRoute role="admin"><AdminGallery /></ProtectedRoute>
         } />
+        <Route path="/admin/portfolio" element={
+          <ProtectedRoute role="admin"><AdminPortfolio /></ProtectedRoute>
+        } />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <WhatsAppButton />

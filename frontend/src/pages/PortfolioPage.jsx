@@ -1,28 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import Navbar from "../components/layouts/Navbar";
 import Footer from "../components/layouts/Footer";
+import api from "../services/api";
 
-const CATEGORIES = ["All", "Graduation", "Weddings", "Portraits", "Events"];
-
-const PORTFOLIO = [
-  { id: 1, category: "Graduation", title: "Campus Graduation",  src: "https://images.unsplash.com/photo-1627556704302-624286467c65?w=600&q=80" },
-  { id: 2, category: "Weddings",   title: "Garden Wedding",     src: "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80" },
-  { id: 3, category: "Portraits",  title: "Studio Portrait",    src: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&q=80" },
-  { id: 4, category: "Events",     title: "Corporate Event",    src: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80" },
-  { id: 5, category: "Graduation", title: "Outdoor Ceremony",   src: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&q=80" },
-  { id: 6, category: "Portraits",  title: "Natural Light",      src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80" },
-  { id: 7, category: "Weddings",   title: "Ceremony Aisle",     src: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&q=80" },
-  { id: 8, category: "Events",     title: "Birthday Party",     src: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&q=80" },
-  { id: 9, category: "Portraits",  title: "Professional Shot",  src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" },
-];
+const CATEGORIES = ["All", "Graduation", "Weddings", "Portraits", "Events", "Corporate", "Birthday"];
 
 export default function PortfolioPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [lightbox, setLightbox] = useState(null);
+  const [photos, setPhotos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = activeCategory === "All" ? PORTFOLIO : PORTFOLIO.filter(p => p.category === activeCategory);
+  useEffect(() => {
+    api.get("/portfolio")
+      .then((r) => setPhotos(r.data.photos))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = activeCategory === "All" ? photos : photos.filter((p) => p.category === activeCategory);
 
   return (
     <div className="min-h-screen bg-dark-900">
@@ -31,7 +29,7 @@ export default function PortfolioPage() {
       {lightbox !== null && (
         <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
           onClick={() => setLightbox(null)}>
-          <img src={filtered[lightbox]?.src?.replace("w=600", "w=1200")} alt=""
+          <img src={filtered[lightbox]?.url} alt=""
             className="max-w-full max-h-[90vh] object-contain rounded-xl" />
           <button className="absolute top-6 right-6 text-gray-400 hover:text-white text-2xl"
             onClick={() => setLightbox(null)}>✕</button>
@@ -58,23 +56,35 @@ export default function PortfolioPage() {
             ))}
           </div>
 
-          <div className="columns-2 sm:columns-3 gap-3 space-y-3">
-            {filtered.map((item, i) => (
-              <div key={item.id} className="break-inside-avoid relative group cursor-pointer"
-                onClick={() => setLightbox(i)}>
-                <img src={item.src} alt={item.title}
-                  className="w-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-[1.02]"
-                  loading="lazy" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent
-                  opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl flex items-end p-4">
-                  <div>
-                    <p className="text-white font-display font-semibold text-sm">{item.title}</p>
-                    <p className="text-brand-300 text-xs font-body mt-0.5">{item.category}</p>
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-5xl mb-4">📸</div>
+              <h3 className="font-display text-xl font-semibold text-white mb-2">No photos yet</h3>
+              <p className="text-gray-400 font-body">Portfolio photos will appear here once uploaded.</p>
+            </div>
+          ) : (
+            <div className="columns-2 sm:columns-3 gap-3 space-y-3">
+              {filtered.map((item, i) => (
+                <div key={item.id} className="break-inside-avoid relative group cursor-pointer"
+                  onClick={() => setLightbox(i)}>
+                  <img src={item.url} alt={item.title}
+                    className="w-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-[1.02]"
+                    loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent
+                    opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl flex items-end p-4">
+                    <div>
+                      <p className="text-white font-display font-semibold text-sm">{item.title}</p>
+                      <p className="text-brand-300 text-xs font-body mt-0.5">{item.category}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-16">
             <p className="text-gray-400 font-body mb-5">Love what you see? Let's create your story.</p>

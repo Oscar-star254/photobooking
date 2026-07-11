@@ -7,9 +7,10 @@ import {
 import { useAuth } from "../../context/AuthContext";
 
 const ADMIN_NAV = [
-  { label: "Dashboard", path: "/admin",          icon: LayoutDashboard },
-  { label: "Bookings",  path: "/admin/bookings", icon: Calendar },
-  { label: "Clients",   path: "/admin/clients",  icon: Users },
+  { label: "Dashboard", path: "/admin",           icon: LayoutDashboard },
+  { label: "Bookings",  path: "/admin/bookings",  icon: Calendar },
+  { label: "Clients",   path: "/admin/clients",   icon: Users },
+  { label: "Portfolio", path: "/admin/portfolio", icon: Image },
 ];
 
 export function AdminSidebar({ open, setOpen }) {
