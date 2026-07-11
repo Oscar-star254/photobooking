@@ -8,6 +8,6 @@ from controllers.portfolio_controller import (
 
 portfolio_bp = Blueprint("portfolio", __name__)
 
-portfolio_bp.route("/",           methods=["GET"])(get_portfolio)
+portfolio_bp.route("", methods=["GET"])
 portfolio_bp.route("/upload",     methods=["POST"])(jwt_required()(upload_portfolio_photo))
 portfolio_bp.route("/<photo_id>", methods=["DELETE"])(jwt_required()(delete_portfolio_photo))
