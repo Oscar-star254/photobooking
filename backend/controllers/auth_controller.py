@@ -24,7 +24,7 @@ def register():
         identity=str(result.inserted_id),
         additional_claims={"role": user_doc["role"]}
     )
-    return jsonify({"message": "Account created successfully", "token": token, "user": UserModel.safe_user(user_doc)}), 201
+    return jsonify({"message": "Account created successfully", "token": token, "user": UserModel.safe_user(user_doc), "access_token": token}), 201
 
 def login():
     data = request.get_json()
@@ -42,7 +42,7 @@ def login():
         identity=str(user["_id"]),
         additional_claims={"role": user["role"]}
     )
-    return jsonify({"message": "Login successful", "token": token, "user": UserModel.safe_user(user)}), 200
+    return jsonify({"message": "Login successful", "token": token, "user": UserModel.safe_user(user), "access_token": token}), 200
 
 def get_profile():
     # Now get_jwt_identity() returns a string (the user ID)

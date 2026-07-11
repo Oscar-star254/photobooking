@@ -1,3 +1,4 @@
+import os
 from flask import request, jsonify
 from flask_jwt_extended import get_jwt_identity
 from datetime import datetime, timezone
@@ -6,15 +7,26 @@ from utils.db import get_db
 from services.storage_service import storage
 
 
+def _to_public_url(url, base_url):
+    if not url:
+        return url
+    if url.startswith(("http://", "https://")):
+        return url
+    if url.startswith("/"):
+        return f"{base_url}{url}"
+    return f"{base_url}/{url}"
+
+
 def get_portfolio():
     db = get_db()
+    base_url = os.getenv("APP_BASE_URL", request.host_url.rstrip("/"))
     photos = list(db.portfolio.find(
         {"is_active": True},
         sort=[("created_at", -1)]
     ))
     result = [{
         "id":       str(p["_id"]),
-        "url":      p["url"],
+        "url":      _to_public_url(p["url"], base_url),
         "category": p["category"],
         "title":    p.get("title", ""),
         "created_at": p["created_at"].isoformat() if p.get("created_at") else None,
@@ -28,6 +40,7 @@ def upload_portfolio_photo():
         return jsonify({"error": "Admin access required"}), 403
 
     db = get_db()
+    base_url = os.getenv("APP_BASE_URL", request.host_url.rstrip("/"))
     file     = request.files.get("photo")
     category = request.form.get("category", "General")
     title    = request.form.get("title", "")
@@ -44,7 +57,7 @@ def upload_portfolio_photo():
         )
         photo_doc = {
             "storage_key": uploaded["key"],
-            "url":         uploaded["url"],
+            "url":         _to_public_url(uploaded["url"], base_url),
             "category":    category,
             "title":       title,
             "is_active":   True,
@@ -56,7 +69,7 @@ def upload_portfolio_photo():
             "message": "Photo uploaded successfully",
             "photo": {
                 "id":       str(result.inserted_id),
-                "url":      uploaded["url"],
+                "url":      _to_public_url(uploaded["url"], base_url),
                 "category": category,
                 "title":    title,
             }

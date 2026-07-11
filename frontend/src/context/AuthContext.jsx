@@ -47,8 +47,9 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const res = await api.post("/auth/login", { email, password });
-      const { token, user } = res.data;
-      
+      const token = res.data?.token || res.data?.access_token;
+      const user = res.data?.user || res.data?.profile || null;
+
       if (!token || !user) {
         throw new Error("Invalid response: missing token or user data");
       }
@@ -74,7 +75,8 @@ export function AuthProvider({ children }) {
   const register = async (data) => {
     try {
       const res = await api.post("/auth/register", data);
-      const { token, user } = res.data;
+      const token = res.data?.token || res.data?.access_token;
+      const user = res.data?.user || res.data?.profile || null;
 
       if (!token || !user) {
         throw new Error("Invalid response: missing token or user data");

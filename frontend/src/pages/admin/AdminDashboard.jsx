@@ -19,7 +19,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     api.get("/admin/analytics")
       .then(r => setData(r.data))
-      .catch(() => toast.error("Failed to load analytics"))
+      .catch((err) => {
+        console.error("Analytics load failed", err);
+        setData({ analytics: {}, recent_bookings: [] });
+        toast.error(err.response?.data?.error || "Failed to load analytics");
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -46,7 +50,7 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <div className="mb-8">
+      <div className="mb-8 bg-dark-900">
         <h1 className="font-display text-2xl font-bold text-white">Admin Dashboard</h1>
         <p className="text-gray-400 font-body mt-1">Overview of your photography business</p>
       </div>

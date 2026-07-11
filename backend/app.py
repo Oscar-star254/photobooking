@@ -1,9 +1,10 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 import os
 from routes.portfolio_routes import portfolio_bp
+from services.storage_service import UPLOAD_DIR
 
 load_dotenv()
 
@@ -41,10 +42,14 @@ def create_app():
     app.register_blueprint(photo_bp,   url_prefix="/api/photos")
     app.register_blueprint(admin_bp,   url_prefix="/api/admin")
     app.register_blueprint(portfolio_bp, url_prefix="/api/portfolio")
-    
+
     @app.route("/api/health")
     def health():
         return {"status": "ok", "message": "LensKenya API is running"}, 200
+
+    @app.route("/uploads/<path:filename>")
+    def uploaded_file(filename):
+        return send_from_directory(str(UPLOAD_DIR), filename)
 
     return app
 

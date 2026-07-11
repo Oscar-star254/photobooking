@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Calendar, Users,
-  Camera, LogOut, Menu, X
+  Camera, Image, LogOut, Menu, X
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -106,10 +106,10 @@ export function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-dark-900 flex">
+    <div className="min-h-screen bg-dark-900 text-white flex">
       <AdminSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 
-      <main className="flex-1 lg:ml-64 min-h-screen">
+      <main className="flex-1 lg:ml-64 min-h-screen bg-dark-900">
         {/* Mobile topbar */}
         <div className="lg:hidden flex items-center justify-between p-4 border-b border-white/5 bg-dark-800 sticky top-0 z-30">
           <button
@@ -124,7 +124,7 @@ export function AdminLayout({ children }) {
         </div>
 
         {/* Page content */}
-        <div className="p-6">{children}</div>
+        <div className="p-6 bg-dark-900 min-h-screen">{children}</div>
       </main>
     </div>
   );

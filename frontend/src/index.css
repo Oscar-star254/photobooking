@@ -7,7 +7,7 @@
 @layer base {
   * { box-sizing: border-box; }
   body {
-    @apply bg-white text-slate-950 font-body antialiased;
+    @apply bg-dark-900 text-white font-body antialiased;
     overflow-x: hidden;
   }
   h1, h2, h3, h4 { @apply font-display; }

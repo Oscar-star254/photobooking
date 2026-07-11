@@ -18,8 +18,12 @@ export default function AdminPortfolio() {
 
   const fetchPhotos = useCallback(() => {
     api.get("/portfolio")
-      .then(r => setPhotos(r.data.photos))
-      .catch(() => toast.error("Failed to load portfolio"))
+      .then(r => setPhotos(r.data.photos || []))
+      .catch((err) => {
+        console.error("Portfolio load failed", err);
+        setPhotos([]);
+        toast.error(err.response?.data?.error || "Failed to load portfolio");
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -65,11 +69,14 @@ export default function AdminPortfolio() {
         uploaded++;
         setProgress(Math.round((uploaded / previews.length) * 100));
       } catch (err) {
-        toast.error(`Failed to upload ${p.name}`);
+        console.error(`Upload failed for ${p.name}`, err);
+        toast.error(err.response?.data?.error || `Failed to upload ${p.name}`);
       }
     }
 
-    toast.success(`${uploaded} photo(s) uploaded!`);
+    if (uploaded > 0) {
+      toast.success(`${uploaded} photo(s) uploaded!`);
+    }
     previews.forEach(p => URL.revokeObjectURL(p.preview));
     setPreviews([]);
     setUploading(false);
