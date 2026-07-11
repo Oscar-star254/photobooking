@@ -1,6 +1,6 @@
 import os
 from flask import request, jsonify
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, get_jwt
 from datetime import datetime, timezone
 from bson import ObjectId
 from utils.db import get_db
