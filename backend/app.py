@@ -44,6 +44,13 @@ def create_app():
     app.register_blueprint(review_bp,    url_prefix="/api/reviews")
     app.register_blueprint(portfolio_bp, url_prefix="/api/portfolio")
 
+    @app.after_request
+def after_request(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+    return response
+
     uploads_dir = Path(__file__).resolve().parent / "uploads"
     uploads_dir.mkdir(exist_ok=True)
 
