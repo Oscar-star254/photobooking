@@ -28,21 +28,29 @@ def create_app():
     JWTManager(app)
     init_db(app)
 
-    @app.before_request
-    def handle_preflight():
-        if request.method == "OPTIONS":
-            response = make_response()
-            response.headers["Access-Control-Allow-Origin"] = "*"
-            response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
-            response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
-            return response
+    def set_cors_headers(response):
+        for header in [
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow-Headers",
+            "Access-Control-Allow-Methods",
+        ]:
+            if header in response.headers:
+                del response.headers[header]
 
-    @app.after_request
-    def after_request(response):
         response.headers["Access-Control-Allow-Origin"] = "*"
         response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
         response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
         return response
+
+    @app.before_request
+    def handle_preflight():
+        if request.method == "OPTIONS":
+            response = make_response()
+            return set_cors_headers(response)
+
+    @app.after_request
+    def after_request(response):
+        return set_cors_headers(response)
 
     app.register_blueprint(auth_bp,      url_prefix="/api/auth")
     app.register_blueprint(booking_bp,   url_prefix="/api/bookings")
