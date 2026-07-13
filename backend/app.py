@@ -1,5 +1,4 @@
-from flask import Flask, send_from_directory
-from flask_cors import CORS
+from flask import Flask, send_from_directory, request, make_response
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 from pathlib import Path
@@ -26,15 +25,24 @@ def create_app():
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES", 86400))
     app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
-    CORS(app,
-        origins="*",
-        allow_headers=["Content-Type", "Authorization"],
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        supports_credentials=False
-    )
-
     JWTManager(app)
     init_db(app)
+
+    @app.before_request
+    def handle_preflight():
+        if request.method == "OPTIONS":
+            response = make_response()
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+            response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+            return response
+
+    @app.after_request
+    def after_request(response):
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+        return response
 
     app.register_blueprint(auth_bp,      url_prefix="/api/auth")
     app.register_blueprint(booking_bp,   url_prefix="/api/bookings")
