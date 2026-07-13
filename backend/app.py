@@ -35,6 +35,17 @@ app.url_map.strict_slashes = False
 
     JWTManager(app)
     init_db(app)
+from pathlib import Path
+import os
+
+# Serve uploaded files
+uploads_dir = Path(__file__).resolve().parent / "uploads"
+uploads_dir.mkdir(exist_ok=True)
+
+@app.route("/uploads/<path:filename>")
+def serve_upload(filename):
+    from flask import send_from_directory
+    return send_from_directory(str(uploads_dir), filename)
 
     app.register_blueprint(auth_bp,    url_prefix="/api/auth")
     app.register_blueprint(booking_bp, url_prefix="/api/bookings")
