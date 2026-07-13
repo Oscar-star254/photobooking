@@ -25,74 +25,77 @@ def get_portfolio():
 
 def upload_portfolio_photo():
     identity = get_jwt_identity()
-    if identity["role"] != "admin":
+    if not identity or identity.get("role") != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
-    db       = get_db()
-    file     = request.files.get("photo")
+    db = get_db()
+    file = request.files.get("photo")
+    if not file:
+        return jsonify({"error": "No photo provided"}), 400
+
     category = request.form.get("category", "General")
-    title    = request.form.get("title", "")
-
-    # Basic validation: check size and allowed extensions
-    filename = file.filename or "upload"
-    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
-    allowed = {"jpg", "jpeg", "png", "gif", "webp"}
-    max_size = current_app.config.get("MAX_CONTENT_LENGTH", 50 * 1024 * 1024)
-
-    file_bytes = file.read()
-    if len(file_bytes) == 0:
-        return jsonify({"error": "Empty file uploaded"}), 400
-    if len(file_bytes) > max_size:
-        return jsonify({"error": "File too large"}), 400
-    if ext and ext not in allowed:
-        return jsonify({"error": "Unsupported file type"}), 400
-
-    content_type = file.content_type or "image/jpeg"
+    title = request.form.get("title", "")
 
     try:
-        logging.info("Uploading portfolio photo: filename=%s size=%d user=%s", file.filename, len(file_bytes), identity.get("id"))
-        uploaded = storage.upload_photo(
-            file_bytes, file.filename, "portfolio", content_type
-        )
-    except Exception as e:
-        logging.exception("Storage upload failed")
-        # return safe error to client and log details server-side
-        return jsonify({"error": "Storage upload failed"}), 502
+        # Basic validation
+        filename = file.filename or "upload"
+        ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+        allowed = {"jpg", "jpeg", "png", "gif", "webp"}
+        max_size = current_app.config.get("MAX_CONTENT_LENGTH", 50 * 1024 * 1024)
 
-    try:
-        photo_doc = {
-            "storage_key": uploaded["key"],
-            "url":         uploaded["url"],
-            "category":    category,
-            "title":       title,
-            "is_active":   True,
-            "uploaded_by": identity["id"],
-            "created_at":  datetime.now(timezone.utc),
-        }
-        result = db.portfolio.insert_one(photo_doc)
-    except Exception:
-        logging.exception("Failed to save portfolio record to database")
-        # attempt to clean up storage if possible
+        file_bytes = file.read()
+        if len(file_bytes) == 0:
+            return jsonify({"error": "Empty file uploaded"}), 400
+        if len(file_bytes) > max_size:
+            return jsonify({"error": "File too large"}), 400
+        if ext and ext not in allowed:
+            return jsonify({"error": "Unsupported file type"}), 400
+
+        content_type = file.content_type or "image/jpeg"
+
         try:
-            storage.delete_photo(uploaded.get("key"))
+            logging.info("Uploading portfolio photo: filename=%s size=%d user=%s", filename, len(file_bytes), identity.get("id"))
+            uploaded = storage.upload_photo(file_bytes, filename, "portfolio", content_type)
         except Exception:
-            pass
-        return jsonify({"error": "Failed to record upload"}), 500
+            logging.exception("Storage upload failed")
+            return jsonify({"error": "Storage upload failed"}), 502
 
-    return jsonify({
-        "message": "Photo uploaded successfully",
-        "photo": {
-            "id":       str(result.inserted_id),
-            "url":      uploaded["url"],
-            "category": category,
-            "title":    title,
-        }
-    }), 201
+        try:
+            photo_doc = {
+                "storage_key": uploaded["key"],
+                "url":         uploaded["url"],
+                "category":    category,
+                "title":       title,
+                "is_active":   True,
+                "uploaded_by": identity.get("id"),
+                "created_at":  datetime.now(timezone.utc),
+            }
+            result = db.portfolio.insert_one(photo_doc)
+        except Exception:
+            logging.exception("Failed to save portfolio record to database")
+            try:
+                storage.delete_photo(uploaded.get("key"))
+            except Exception:
+                pass
+            return jsonify({"error": "Failed to record upload"}), 500
+
+        return jsonify({
+            "message": "Photo uploaded successfully",
+            "photo": {
+                "id":       str(result.inserted_id),
+                "url":      uploaded["url"],
+                "category": category,
+                "title":    title,
+            }
+        }), 201
+    except Exception:
+        logging.exception("Unexpected error during portfolio upload")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 def delete_portfolio_photo(photo_id):
     identity = get_jwt_identity()
-    if identity["role"] != "admin":
+    if not identity or identity.get("role") != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
     db = get_db()
