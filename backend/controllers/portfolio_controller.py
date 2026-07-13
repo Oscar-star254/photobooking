@@ -38,7 +38,6 @@ def upload_portfolio_photo():
     title = request.form.get("title", "")
 
     try:
-        # Basic validation
         filename = file.filename or "upload"
         ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
         allowed = {"jpg", "jpeg", "png", "gif", "webp"}
@@ -61,10 +60,16 @@ def upload_portfolio_photo():
             logging.exception("Storage upload failed")
             return jsonify({"error": "Storage upload failed"}), 502
 
+        # Fix URL — make absolute so frontend can load it
+        backend_url = "https://photobooking-2-d4nb.onrender.com"
+        photo_url = uploaded["url"]
+        if photo_url.startswith("/"):
+            photo_url = f"{backend_url}{photo_url}"
+
         try:
             photo_doc = {
                 "storage_key": uploaded["key"],
-                "url":         uploaded["url"],
+                "url":         photo_url,
                 "category":    category,
                 "title":       title,
                 "is_active":   True,
@@ -84,7 +89,7 @@ def upload_portfolio_photo():
             "message": "Photo uploaded successfully",
             "photo": {
                 "id":       str(result.inserted_id),
-                "url":      uploaded["url"],
+                "url":      photo_url,
                 "category": category,
                 "title":    title,
             }
@@ -119,7 +124,6 @@ def delete_portfolio_photo(photo_id):
 
 
 def storage_health():
-    """Simple health check for storage availability."""
     try:
         if storage.client:
             try:
