@@ -1,5 +1,5 @@
 from flask import request, jsonify, current_app
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, get_jwt
 from datetime import datetime, timezone
 from bson import ObjectId
 from utils.db import get_db
@@ -24,8 +24,9 @@ def get_portfolio():
 
 
 def upload_portfolio_photo():
-    identity = get_jwt_identity()
-    if not identity or identity.get("role") != "admin":
+    user_id = get_jwt_identity()
+    claims = get_jwt()
+    if not user_id or claims.get("role") != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
     db = get_db()
@@ -54,7 +55,7 @@ def upload_portfolio_photo():
         content_type = file.content_type or "image/jpeg"
 
         try:
-            logging.info("Uploading portfolio photo: filename=%s size=%d user=%s", filename, len(file_bytes), identity.get("id"))
+            logging.info("Uploading portfolio photo: filename=%s size=%d user=%s", filename, len(file_bytes), user_id)
             uploaded = storage.upload_photo(file_bytes, filename, "portfolio", content_type)
         except Exception:
             logging.exception("Storage upload failed")
@@ -67,7 +68,7 @@ def upload_portfolio_photo():
                 "category":    category,
                 "title":       title,
                 "is_active":   True,
-                "uploaded_by": identity.get("id"),
+                "uploaded_by": user_id,
                 "created_at":  datetime.now(timezone.utc),
             }
             result = db.portfolio.insert_one(photo_doc)
@@ -94,8 +95,9 @@ def upload_portfolio_photo():
 
 
 def delete_portfolio_photo(photo_id):
-    identity = get_jwt_identity()
-    if not identity or identity.get("role") != "admin":
+    user_id = get_jwt_identity()
+    claims = get_jwt()
+    if not user_id or claims.get("role") != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
     db = get_db()
