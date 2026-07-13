@@ -25,12 +25,12 @@ def create_app():
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES", 86400))
     app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
-    CORS(app, 
-    origins="*",
-    allow_headers=["Content-Type", "Authorization"],
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    supports_credentials=False
-)
+    CORS(app,
+        origins="*",
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        supports_credentials=False
+    )
 
     JWTManager(app)
     init_db(app)
@@ -44,19 +44,19 @@ def create_app():
     app.register_blueprint(review_bp,    url_prefix="/api/reviews")
     app.register_blueprint(portfolio_bp, url_prefix="/api/portfolio")
 
-    @app.after_request
-def after_request(response):
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
-    return response
-
     uploads_dir = Path(__file__).resolve().parent / "uploads"
     uploads_dir.mkdir(exist_ok=True)
 
     @app.route("/uploads/<path:filename>")
     def serve_upload(filename):
         return send_from_directory(str(uploads_dir), filename)
+
+    @app.after_request
+    def after_request(response):
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+        response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+        return response
 
     @app.route("/api/health")
     def health():
