@@ -1,34 +1,22 @@
-import os
 from flask import request, jsonify
-from flask_jwt_extended import get_jwt_identity, get_jwt
+from flask_jwt_extended import get_jwt_identity
 from datetime import datetime, timezone
 from bson import ObjectId
 from utils.db import get_db
 from services.storage_service import storage
 
 
-def _to_public_url(url, base_url):
-    if not url:
-        return url
-    if url.startswith(("http://", "https://")):
-        return url
-    if url.startswith("/"):
-        return f"{base_url}{url}"
-    return f"{base_url}/{url}"
-
-
 def get_portfolio():
     db = get_db()
-    base_url = os.getenv("APP_BASE_URL", request.host_url.rstrip("/"))
     photos = list(db.portfolio.find(
         {"is_active": True},
         sort=[("created_at", -1)]
     ))
     result = [{
-        "id":       str(p["_id"]),
-        "url":      _to_public_url(p["url"], base_url),
-        "category": p["category"],
-        "title":    p.get("title", ""),
+        "id":         str(p["_id"]),
+        "url":        p["url"],
+        "category":   p["category"],
+        "title":      p.get("title", ""),
         "created_at": p["created_at"].isoformat() if p.get("created_at") else None,
     } for p in photos]
     return jsonify({"photos": result}), 200
@@ -36,14 +24,10 @@ def get_portfolio():
 
 def upload_portfolio_photo():
     identity = get_jwt_identity()
-claims = get_jwt()
-
-if claims.get("role") != "admin":
-    return jsonify({"error": "Admin access required"}), 403
+    if identity["role"] != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
-    db = get_db()
-    base_url = os.getenv("APP_BASE_URL", request.host_url.rstrip("/"))
+    db       = get_db()
     file     = request.files.get("photo")
     category = request.form.get("category", "General")
     title    = request.form.get("title", "")
@@ -60,7 +44,7 @@ if claims.get("role") != "admin":
         )
         photo_doc = {
             "storage_key": uploaded["key"],
-            "url":         _to_public_url(uploaded["url"], base_url),
+            "url":         uploaded["url"],
             "category":    category,
             "title":       title,
             "is_active":   True,
@@ -72,7 +56,7 @@ if claims.get("role") != "admin":
             "message": "Photo uploaded successfully",
             "photo": {
                 "id":       str(result.inserted_id),
-                "url":      _to_public_url(uploaded["url"], base_url),
+                "url":      uploaded["url"],
                 "category": category,
                 "title":    title,
             }
@@ -83,10 +67,7 @@ if claims.get("role") != "admin":
 
 def delete_portfolio_photo(photo_id):
     identity = get_jwt_identity()
-claims = get_jwt()
-
-if claims.get("role") != "admin":
-    return jsonify({"error": "Admin access required"}), 403
+    if identity["role"] != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
     db = get_db()
