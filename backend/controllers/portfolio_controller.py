@@ -50,6 +50,7 @@ def upload_portfolio_photo():
     content_type = file.content_type or "image/jpeg"
 
     try:
+        logging.info("Uploading portfolio photo: filename=%s size=%d user=%s", file.filename, len(file_bytes), identity.get("id"))
         uploaded = storage.upload_photo(
             file_bytes, file.filename, "portfolio", content_type
         )
