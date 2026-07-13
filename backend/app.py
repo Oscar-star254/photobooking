@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, request, make_response
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
