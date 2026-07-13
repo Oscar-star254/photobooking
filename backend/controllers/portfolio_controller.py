@@ -1,9 +1,10 @@
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 from flask_jwt_extended import get_jwt_identity
 from datetime import datetime, timezone
 from bson import ObjectId
 from utils.db import get_db
 from services.storage_service import storage
+import logging
 
 
 def get_portfolio():
@@ -32,16 +33,32 @@ def upload_portfolio_photo():
     category = request.form.get("category", "General")
     title    = request.form.get("title", "")
 
-    if not file:
-        return jsonify({"error": "No photo provided"}), 400
+    # Basic validation: check size and allowed extensions
+    filename = file.filename or "upload"
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+    allowed = {"jpg", "jpeg", "png", "gif", "webp"}
+    max_size = current_app.config.get("MAX_CONTENT_LENGTH", 50 * 1024 * 1024)
 
-    file_bytes   = file.read()
+    file_bytes = file.read()
+    if len(file_bytes) == 0:
+        return jsonify({"error": "Empty file uploaded"}), 400
+    if len(file_bytes) > max_size:
+        return jsonify({"error": "File too large"}), 400
+    if ext and ext not in allowed:
+        return jsonify({"error": "Unsupported file type"}), 400
+
     content_type = file.content_type or "image/jpeg"
 
     try:
         uploaded = storage.upload_photo(
             file_bytes, file.filename, "portfolio", content_type
         )
+    except Exception as e:
+        logging.exception("Storage upload failed")
+        # return safe error to client and log details server-side
+        return jsonify({"error": "Storage upload failed"}), 502
+
+    try:
         photo_doc = {
             "storage_key": uploaded["key"],
             "url":         uploaded["url"],
@@ -52,17 +69,24 @@ def upload_portfolio_photo():
             "created_at":  datetime.now(timezone.utc),
         }
         result = db.portfolio.insert_one(photo_doc)
-        return jsonify({
-            "message": "Photo uploaded successfully",
-            "photo": {
-                "id":       str(result.inserted_id),
-                "url":      uploaded["url"],
-                "category": category,
-                "title":    title,
-            }
-        }), 201
-    except Exception as e:
-        return jsonify({"error": f"Upload failed: {str(e)}"}), 500
+    except Exception:
+        logging.exception("Failed to save portfolio record to database")
+        # attempt to clean up storage if possible
+        try:
+            storage.delete_photo(uploaded.get("key"))
+        except Exception:
+            pass
+        return jsonify({"error": "Failed to record upload"}), 500
+
+    return jsonify({
+        "message": "Photo uploaded successfully",
+        "photo": {
+            "id":       str(result.inserted_id),
+            "url":      uploaded["url"],
+            "category": category,
+            "title":    title,
+        }
+    }), 201
 
 
 def delete_portfolio_photo(photo_id):
