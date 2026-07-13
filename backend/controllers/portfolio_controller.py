@@ -110,3 +110,27 @@ def delete_portfolio_photo(photo_id):
 
     db.portfolio.delete_one({"_id": ObjectId(photo_id)})
     return jsonify({"message": "Photo deleted"}), 200
+
+
+def storage_health():
+    """Simple health check for storage availability."""
+    try:
+        if storage.client:
+            try:
+                storage.client.list_buckets()
+                ok = True
+                details = "remote storage reachable"
+            except Exception as e:
+                ok = False
+                details = f"remote storage error: {str(e)}"
+        else:
+            from pathlib import Path
+            UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"
+            ok = UPLOAD_DIR.exists() and UPLOAD_DIR.is_dir()
+            details = "local uploads directory present" if ok else "uploads directory missing"
+    except Exception as e:
+        ok = False
+        details = str(e)
+
+    status_code = 200 if ok else 500
+    return jsonify({"ok": ok, "details": details}), status_code
