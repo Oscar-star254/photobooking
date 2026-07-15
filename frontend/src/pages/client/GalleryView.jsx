@@ -265,18 +265,133 @@ const downloadZip = async () => {
         )}
       </div>
 
-      {/* Lock banner */}
-      {!gallery?.is_paid && (
-        <div className="bg-brand-500/10 border border-brand-500/20 rounded-xl p-5 mb-8 flex items-center gap-4">
-          <Lock className="w-6 h-6 text-brand-400 shrink-0" />
-          <div>
-            <p className="text-white font-body font-medium">Gallery Locked</p>
-            <p className="text-gray-400 text-sm font-body mt-0.5">
-              Pay with M-Pesa to download full-resolution photos without watermarks.
-            </p>
+      {/* Lock banner + Payment Card */}
+{!gallery?.is_paid && (
+  <div className="space-y-4 mb-8">
+
+    {/* Lock Banner */}
+    <div className="bg-brand-500/10 border border-brand-500/20 rounded-xl p-5 flex items-center gap-4">
+      <Lock className="w-6 h-6 text-brand-400 shrink-0" />
+      <div>
+        <p className="text-white font-body font-medium">Gallery Locked</p>
+        <p className="text-gray-400 text-sm font-body mt-0.5">
+          Pay to download full-resolution photos without watermarks.
+        </p>
+      </div>
+    </div>
+
+    {/* Payment Card */}
+    <div className="relative overflow-hidden rounded-2xl border border-brand-500/30"
+      style={{
+        background: "linear-gradient(135deg, #1a0a00 0%, #2a1200 40%, #1a0800 100%)",
+      }}>
+
+      {/* Decorative circles */}
+      <div className="absolute top-0 right-0 w-48 h-48 bg-brand-500/10 rounded-full -translate-y-1/2 translate-x-1/4" />
+      <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-600/10 rounded-full translate-y-1/2 -translate-x-1/4" />
+      <div className="absolute top-1/2 right-1/4 w-20 h-20 bg-brand-400/5 rounded-full -translate-y-1/2" />
+
+      <div className="relative z-10 p-6">
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+              </svg>
+            </div>
+            <span className="font-display text-white font-bold text-lg">LensKenya</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-6 h-6 bg-red-500 rounded-full opacity-80" />
+            <div className="w-6 h-6 bg-yellow-400 rounded-full opacity-80 -ml-2" />
           </div>
         </div>
-      )}
+
+        {/* Amount */}
+        <div className="mb-6">
+          <p className="text-gray-400 text-xs font-body uppercase tracking-widest mb-1">Amount Due</p>
+          <p className="font-display text-3xl font-bold text-brand-400">
+            KES {booking?.package_price?.toLocaleString() || "—"}
+          </p>
+          <p className="text-gray-500 text-xs font-body mt-1">{gallery?.title}</p>
+        </div>
+
+        {/* Payment Details */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+
+          {/* M-Pesa Paybill */}
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <p className="text-gray-400 text-xs font-body uppercase tracking-widest mb-2">
+              M-Pesa Paybill
+            </p>
+            <p className="font-display text-2xl font-bold text-white tracking-widest">
+              522533
+            </p>
+            <p className="text-gray-500 text-xs font-body mt-1">Business Number</p>
+          </div>
+
+          {/* Account Number */}
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <p className="text-gray-400 text-xs font-body uppercase tracking-widest mb-2">
+              Account Number
+            </p>
+            <p className="font-display text-2xl font-bold text-brand-400 tracking-widest">
+              0758695620
+            </p>
+            <p className="text-gray-500 text-xs font-body mt-1">Oscar Aora</p>
+          </div>
+
+        </div>
+
+        {/* Steps */}
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10 mb-5">
+          <p className="text-gray-300 text-xs font-body font-medium mb-3 uppercase tracking-widest">
+            How to Pay
+          </p>
+          <div className="space-y-2">
+            {[
+              "Go to M-Pesa → Lipa na M-Pesa → Paybill",
+              "Enter Business No: 522533",
+              "Enter Account No: 0758695620",
+              "Enter Amount: KES " + (booking?.package_price?.toLocaleString() || "—"),
+              "Enter PIN and confirm",
+            ].map((step, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-brand-500/20 text-brand-400 text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                  {i + 1}
+                </span>
+                <p className="text-gray-400 text-xs font-body">{step}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* OR divider */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-gray-500 text-xs font-body">OR PAY VIA STK PUSH</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+
+        {/* STK Push Button */}
+        <button
+          onClick={() => setShowPayment(true)}
+          className="w-full bg-brand-500 hover:bg-brand-400 text-white font-body font-medium py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2"
+        >
+          <CreditCard className="w-5 h-5" />
+          Pay with M-Pesa STK Push
+        </button>
+
+        {/* Footer note */}
+        <p className="text-gray-600 text-xs font-body text-center mt-4">
+          🔒 Secure payment · Gallery unlocks automatically after payment
+        </p>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Unlocked banner */}
       {gallery?.is_paid && (
