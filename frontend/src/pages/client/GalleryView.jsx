@@ -353,8 +353,8 @@ const downloadZip = async () => {
           <div className="space-y-2">
             {[
               "Go to M-Pesa → Lipa na M-Pesa → Paybill",
-              "Enter Business No: 522533",
-              "Enter Account No: 0758695620",
+              "Enter Business No: 4096483",
+              "Enter Account No: 333154",
               "Enter Amount: KES " + (booking?.package_price?.toLocaleString() || "—"),
               "Enter PIN and confirm",
             ].map((step, i) => (
