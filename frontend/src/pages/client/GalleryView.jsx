@@ -327,7 +327,7 @@ const downloadZip = async () => {
               M-Pesa Paybill
             </p>
             <p className="font-display text-2xl font-bold text-white tracking-widest">
-              522533
+              4096483
             </p>
             <p className="text-gray-500 text-xs font-body mt-1">Business Number</p>
           </div>
@@ -338,7 +338,7 @@ const downloadZip = async () => {
               Account Number
             </p>
             <p className="font-display text-2xl font-bold text-brand-400 tracking-widest">
-              0758695620
+              333154M
             </p>
             <p className="text-gray-500 text-xs font-body mt-1">Oscar Aora</p>
           </div>
@@ -354,7 +354,7 @@ const downloadZip = async () => {
             {[
               "Go to M-Pesa → Lipa na M-Pesa → Paybill",
               "Enter Business No: 4096483",
-              "Enter Account No: 333154",
+              "Enter Account No: 333154M",
               "Enter Amount: KES " + (booking?.package_price?.toLocaleString() || "—"),
               "Enter PIN and confirm",
             ].map((step, i) => (
