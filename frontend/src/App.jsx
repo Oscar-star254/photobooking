@@ -22,6 +22,7 @@ import AdminBookings   from "./pages/admin/AdminBookings";
 import AdminClients    from "./pages/admin/AdminClients";
 import AdminGallery    from "./pages/admin/AdminGallery";
 import AdminPortfolio  from "./pages/admin/AdminPortfolio";
+import AdminReviews from "./pages/admin/AdminReviews";
 
 function WhatsAppButton() {
   useEffect(() => {
@@ -81,6 +82,9 @@ function AppRoutes() {
         <Route path="/dashboard/gallery/:galleryId" element={
           <ProtectedRoute><GalleryView /></ProtectedRoute>
         } />
+        <Route path="/admin/reviews" element={
+  <ProtectedRoute role="admin"><AdminReviews /></ProtectedRoute>
+} />
 
         {/* Admin */}
         <Route path="/admin" element={

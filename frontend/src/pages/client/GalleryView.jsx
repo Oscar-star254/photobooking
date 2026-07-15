@@ -4,6 +4,7 @@ import { Download, Lock, CreditCard, ArrowLeft, CheckCircle, Loader } from "luci
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
+import ReviewPopup from "../../components/ReviewPopup";
 
 function PaymentModal({ booking, galleryTitle, onClose, onSuccess }) {
   const { user } = useAuth();
@@ -117,6 +118,17 @@ export default function GalleryView() {
   const [lightbox, setLightbox]       = useState(null);
   const [showPayment, setShowPayment] = useState(false);
   const [booking, setBooking]         = useState(null);
+const [showReview, setShowReview] = useState(false);
+const [hasReviewed, setHasReviewed] = useState(false);
+
+useEffect(() => {
+  if (booking?.id) {
+    api.get(`/reviews/can-review/${booking.id}`)
+      .then(r => setHasReviewed(!r.data.can_review))
+      .catch(() => {});
+  }
+}, [booking]);
+
 
   const fetchGallery = useCallback(async () => {
     try {
@@ -144,32 +156,46 @@ export default function GalleryView() {
     }
   }, [gallery]);
 
-  const downloadPhoto = async (photoId, filename) => {
-    try {
-      const res = await api.get(`/photos/${photoId}/download`);
-      const a = document.createElement("a");
-      a.href = res.data.download_url;
-      a.download = filename;
-      a.click();
-    } catch (err) {
-      toast.error(err.response?.data?.error || "Download failed");
-    }
-  };
+ const downloadPhoto = async (photoId, filename) => {
+  try {
+    const res = await api.get(`/photos/${photoId}/download`);
+    const a = document.createElement("a");
+    a.href = res.data.download_url;
+    a.download = filename;
+    a.click();
 
-  const downloadZip = async () => {
-    try {
-      toast("Preparing ZIP download...", { icon: "📦" });
-      const res = await api.get(`/photos/gallery/${galleryId}/zip`, { responseType: "blob" });
-      const url = URL.createObjectURL(res.data);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${gallery.title}_photos.zip`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      toast.error("ZIP download failed");
+    if (!hasReviewed) {
+      setTimeout(() => setShowReview(true), 1500);
     }
-  };
+  } catch (err) {
+    toast.error(err.response?.data?.error || "Download failed");
+  }
+};
+
+const downloadZip = async () => {
+  try {
+    toast("Preparing ZIP download...", { icon: "📦" });
+
+    const res = await api.get(
+      `/photos/gallery/${galleryId}/zip`,
+      { responseType: "blob" }
+    );
+
+    const url = URL.createObjectURL(res.data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${gallery.title}_photos.zip`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+    if (!hasReviewed) {
+      setTimeout(() => setShowReview(true), 1500);
+    }
+  } catch (err) {
+    toast.error("ZIP download failed");
+  }
+};
 
   if (loading) return (
     <div className="min-h-screen bg-dark-900 lg:ml-64 flex items-center justify-center">
@@ -201,6 +227,12 @@ export default function GalleryView() {
           />
         </div>
       )}
+      {showReview && booking && (
+  <ReviewPopup
+    bookingId={booking.id}
+    onClose={() => { setShowReview(false); setHasReviewed(true); }}
+  />
+)}
 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-8">

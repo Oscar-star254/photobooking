@@ -5,12 +5,14 @@ import {
   Camera, Image, LogOut, Menu, X
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { LayoutDashboard, Calendar, Users, Image, Star, Camera, LogOut, Menu, X } from "lucide-react";
 
 const ADMIN_NAV = [
   { label: "Dashboard", path: "/admin",           icon: LayoutDashboard },
   { label: "Bookings",  path: "/admin/bookings",  icon: Calendar },
   { label: "Clients",   path: "/admin/clients",   icon: Users },
   { label: "Portfolio", path: "/admin/portfolio", icon: Image },
+  { label: "Reviews", path: "/admin/reviews", icon: Star },
 ];
 
 export function AdminSidebar({ open, setOpen }) {
