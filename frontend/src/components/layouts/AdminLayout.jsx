@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Calendar, Users,
-  Camera, Image, LogOut, Menu, X
+  LayoutDashboard, Calendar, Users, Image, Star,
+  Camera, LogOut, Menu, X
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import { LayoutDashboard, Calendar, Users, Image, Star, Camera, LogOut, Menu, X } from "lucide-react";
 
 const ADMIN_NAV = [
   { label: "Dashboard", path: "/admin",           icon: LayoutDashboard },
