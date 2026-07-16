@@ -9,7 +9,7 @@ try:
     MPESA_AVAILABLE = True
 except Exception:
     MPESA_AVAILABLE = False
-    print("⚠️ M-Pesa service not available")
+    print(f"❌ M-Pesa import error: {e}")
 
 
 def initiate_payment():
