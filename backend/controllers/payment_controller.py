@@ -1,15 +1,9 @@
 from flask import request, jsonify
-from flask_jwt_extended import get_jwt_identity, get_jwt
+from flask_jwt_extended import get_jwt_identity
 from datetime import datetime, timezone
 from bson import ObjectId
 from utils.db import get_db
-
-try:
-    from services.mpesa_service import mpesa
-    MPESA_AVAILABLE = True
-except Exception:
-    MPESA_AVAILABLE = False
-    print(f"❌ M-Pesa import error: {e}")
+from services.mpesa_service import mpesa
 
 
 def initiate_payment():
@@ -59,25 +53,24 @@ def initiate_payment():
             account_ref = payment_id[:12],
             description = "PhotoGallery",
         )
-
-        # Save checkout request ID
-        db.payments.update_one(
-            {"_id": payment_result.inserted_id},
-            {"$set": {
-                "checkout_request_id": stk_response.get("CheckoutRequestID"),
-                "merchant_request_id": stk_response.get("MerchantRequestID"),
-            }}
-        )
-
-        return jsonify({
-            "message":             "STK Push sent! Check your phone.",
-            "payment_id":          payment_id,
-            "checkout_request_id": stk_response.get("CheckoutRequestID"),
-        }), 200
-
     except Exception as e:
         db.payments.delete_one({"_id": payment_result.inserted_id})
         return jsonify({"error": f"M-Pesa request failed: {str(e)}"}), 502
+
+    # Save checkout request ID
+    db.payments.update_one(
+        {"_id": payment_result.inserted_id},
+        {"$set": {
+            "checkout_request_id": stk_response.get("CheckoutRequestID"),
+            "merchant_request_id": stk_response.get("MerchantRequestID"),
+        }}
+    )
+
+    return jsonify({
+        "message":             "STK Push sent! Check your phone.",
+        "payment_id":          payment_id,
+        "checkout_request_id": stk_response.get("CheckoutRequestID"),
+    }), 200
 
 
 def mpesa_callback():
@@ -85,8 +78,8 @@ def mpesa_callback():
     db   = get_db()
 
     try:
-        stk_callback        = data["Body"]["stkCallback"]
-        result_code         = stk_callback["ResultCode"]
+        stk_callback       = data["Body"]["stkCallback"]
+        result_code        = stk_callback["ResultCode"]
         checkout_request_id = stk_callback["CheckoutRequestID"]
 
         payment = db.payments.find_one({"checkout_request_id": checkout_request_id})
@@ -100,15 +93,15 @@ def mpesa_callback():
             db.payments.update_one(
                 {"checkout_request_id": checkout_request_id},
                 {"$set": {
-                    "status":        "paid",
+                    "status":       "paid",
                     "mpesa_receipt": meta.get("MpesaReceiptNumber"),
-                    "amount_paid":   meta.get("Amount"),
-                    "paid_at":       datetime.now(timezone.utc),
-                    "updated_at":    datetime.now(timezone.utc),
+                    "amount_paid":  meta.get("Amount"),
+                    "paid_at":      datetime.now(timezone.utc),
+                    "updated_at":   datetime.now(timezone.utc),
                 }}
             )
 
-            # Unlock booking
+            # Unlock gallery
             db.bookings.update_one(
                 {"_id": ObjectId(payment["booking_id"])},
                 {"$set": {
@@ -117,7 +110,7 @@ def mpesa_callback():
                 }}
             )
 
-            # Unlock gallery
+            # Update gallery is_paid
             gallery = db.galleries.find_one({"booking_id": payment["booking_id"]})
             if gallery:
                 db.galleries.update_one(
@@ -143,9 +136,7 @@ def mpesa_callback():
 
 
 def check_payment_status():
-    user_id = get_jwt_identity()
-claims = get_jwt()
-role = claims.get("role")
+    identity   = get_jwt_identity()
     payment_id = request.args.get("payment_id")
 
     if not payment_id:
@@ -161,7 +152,7 @@ role = claims.get("role")
     if not payment:
         return jsonify({"error": "Payment not found"}), 404
 
-    if role != "admin" and payment["user_id"] != user_id:
+    if identity["role"] != "admin" and payment["user_id"] != identity["id"]:
         return jsonify({"error": "Access denied"}), 403
 
     return jsonify({
@@ -173,11 +164,11 @@ role = claims.get("role")
 
 
 def get_my_payments():
-    user_id = get_jwt_identity()
+    identity = get_jwt_identity()
     db       = get_db()
 
     payments = list(db.payments.find(
-        {"user_id": user_id}
+        {"user_id": identity["id"]},
         sort=[("created_at", -1)]
     ))
 
