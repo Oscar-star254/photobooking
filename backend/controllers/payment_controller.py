@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, get_jwt
 from datetime import datetime, timezone
 from bson import ObjectId
 from utils.db import get_db
@@ -143,7 +143,9 @@ def mpesa_callback():
 
 
 def check_payment_status():
-    identity   = get_jwt_identity()
+    user_id = get_jwt_identity()
+claims = get_jwt()
+role = claims.get("role")
     payment_id = request.args.get("payment_id")
 
     if not payment_id:
@@ -159,7 +161,7 @@ def check_payment_status():
     if not payment:
         return jsonify({"error": "Payment not found"}), 404
 
-    if identity["role"] != "admin" and payment["user_id"] != identity["id"]:
+    if role != "admin" and payment["user_id"] != user_id:
         return jsonify({"error": "Access denied"}), 403
 
     return jsonify({
@@ -171,11 +173,11 @@ def check_payment_status():
 
 
 def get_my_payments():
-    identity = get_jwt_identity()
+    user_id = get_jwt_identity()
     db       = get_db()
 
     payments = list(db.payments.find(
-        {"user_id": identity["id"]},
+        {"user_id": user_id}
         sort=[("created_at", -1)]
     ))
 
