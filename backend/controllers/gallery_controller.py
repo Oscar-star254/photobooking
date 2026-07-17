@@ -30,42 +30,32 @@ def get_my_galleries():
     return jsonify({"galleries": result}), 200
 
 
-def get_gallery(gallery_id):
+def get_my_galleries():
     identity = get_jwt_identity()
     db = get_db()
-    try:
-        gallery = db.galleries.find_one({"_id": ObjectId(gallery_id)})
-    except Exception:
-        return jsonify({"error": "Invalid gallery ID"}), 400
-    if not gallery:
-        return jsonify({"error": "Gallery not found"}), 404
-    if identity["role"] != "admin" and gallery["user_id"] != identity["id"]:
-        return jsonify({"error": "Access denied"}), 403
 
-    photos = list(db.photos.find({"gallery_id": gallery_id}))
-    is_paid = gallery.get("is_paid", False)
+    # Handle both string identity and dict identity
+    user_id = identity if isinstance(identity, str) else identity.get("id")
 
-    photo_list = [{
-        "id":        str(p["_id"]),
-        "url":       p.get("watermark_url", p.get("url")) if not is_paid else p.get("url"),
-        "thumbnail": p.get("watermark_url", p.get("url")),
-        "filename":  p["original_filename"],
-        "is_locked": not is_paid,
-    } for p in photos]
-
-    return jsonify({
-        "gallery": {
-            "id":          str(gallery["_id"]),
-            "title":       gallery["title"],
-            "booking_id":  gallery.get("booking_id"),
-            "is_paid":     is_paid,
-            "is_ready":    gallery.get("is_ready", False),
-            "photo_count": len(photo_list),
-            "cover_url":   gallery.get("cover_url"),
-            "created_at":  gallery["created_at"].isoformat() if gallery.get("created_at") else None,
-        },
-        "photos": photo_list,
-    }), 200
+    galleries = list(db.galleries.find(
+        {"user_id": user_id},
+        sort=[("created_at", -1)]
+    ))
+    result = []
+    for g in galleries:
+        photo_count = db.photos.count_documents({"gallery_id": str(g["_id"])})
+        result.append({
+            "id":          str(g["_id"]),
+            "title":       g["title"],
+            "booking_id":  g.get("booking_id"),
+            "user_id":     g["user_id"],
+            "is_paid":     g.get("is_paid", False),
+            "is_ready":    g.get("is_ready", False),
+            "photo_count": photo_count,
+            "cover_url":   g.get("cover_url"),
+            "created_at":  g["created_at"].isoformat() if g.get("created_at") else None,
+        })
+    return jsonify({"galleries": result}), 200
 
 
 def upload_photos(gallery_id):
