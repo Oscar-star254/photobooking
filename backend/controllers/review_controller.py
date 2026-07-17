@@ -6,10 +6,9 @@ from utils.db import get_db
 
 
 def create_review():
-   identity = get_jwt_identity()
-user_id, role = _get_user_id_and_role(identity)
+    identity = get_jwt_identity()
+    user_id, role = _get_user_id_and_role(identity)
     data = request.get_json()
-
     if not data.get("rating"):
         return jsonify({"error": "Rating is required"}), 400
 
