@@ -1,4 +1,4 @@
-def get_gallery(gallery_id):
+def get_my_gallery(gallery_id):
     identity = get_jwt_identity()
     db = get_db()
 
