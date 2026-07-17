@@ -1,13 +1,15 @@
 import axios from "axios";
 
 const api = axios.create({
-baseURL: "https://photobooking-2-d4nb.onrender.com/api",
+  baseURL: "https://photobooking-2-d4nb.onrender.com/api",
   timeout: 30000,
 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
@@ -20,6 +22,9 @@ api.interceptors.response.use(
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
       }
+    }
+    if (!error.response) {
+      console.error("Network error:", error.message);
     }
     return Promise.reject(error);
   }

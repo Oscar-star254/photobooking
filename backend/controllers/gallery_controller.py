@@ -1,62 +1,37 @@
-def get_my_gallery(gallery_id):
-    identity = get_jwt_identity()
+def get_my_galleries():
+   identity = get_jwt_identity()
+user_id, role = _get_user_id_and_role(identity)
     db = get_db()
+def _get_user_id_and_role(identity):
+    if isinstance(identity, str):
+        return identity, "client"
+    return identity.get("id"), identity.get("role", "client")
 
-    # Handle both string and dict JWT identities
+    # Handle both string identity and dict identity
     user_id = identity if isinstance(identity, str) else identity.get("id")
-    user_role = None if isinstance(identity, str) else identity.get("role")
 
-    # Validate gallery ID
-    try:
-        gallery = db.galleries.find_one({"_id": ObjectId(gallery_id)})
-    except Exception:
-        return jsonify({"error": "Invalid gallery ID"}), 400
+    galleries = list(db.galleries.find(
+        {"user_id": user_id},
+        sort=[("created_at", -1)]
+    ))
 
-    if not gallery:
-        return jsonify({"error": "Gallery not found"}), 404
-
-    # Only the gallery owner or an admin can view it
-    if user_role != "admin" and gallery.get("user_id") != user_id:
-        return jsonify({"error": "Access denied"}), 403
-
-    # Get all photos belonging to this gallery
-    photos = list(
-        db.photos.find(
-            {"gallery_id": gallery_id},
-            sort=[("uploaded_at", 1)]
-        )
-    )
-
-    photo_list = []
-    for photo in photos:
-        photo_list.append({
-            "id": str(photo["_id"]),
-            "filename": photo.get("original_filename"),
-            "url": photo.get("url"),
-            "watermark_url": photo.get("watermark_url", photo.get("url")),
-            "size": photo.get("size", 0),
-            "uploaded_at": (
-                photo["uploaded_at"].isoformat()
-                if photo.get("uploaded_at")
+    result = []
+    for g in galleries:
+        photo_count = db.photos.count_documents({"gallery_id": str(g["_id"])})
+        result.append({
+            "id": str(g["_id"]),
+            "title": g.get("title"),
+            "booking_id": g.get("booking_id"),
+            "user_id": g.get("user_id"),
+            "is_paid": g.get("is_paid", False),
+            "is_ready": g.get("is_ready", False),
+            "photo_count": photo_count,
+            "cover_url": g.get("cover_url"),
+            "created_at": (
+                g["created_at"].isoformat()
+                if g.get("created_at")
                 else None
             ),
         })
 
-    return jsonify({
-        "gallery": {
-            "id": str(gallery["_id"]),
-            "title": gallery.get("title"),
-            "booking_id": gallery.get("booking_id"),
-            "user_id": gallery.get("user_id"),
-            "is_paid": gallery.get("is_paid", False),
-            "is_ready": gallery.get("is_ready", False),
-            "cover_url": gallery.get("cover_url"),
-            "created_at": (
-                gallery["created_at"].isoformat()
-                if gallery.get("created_at")
-                else None
-            ),
-            "photo_count": len(photo_list),
-            "photos": photo_list,
-        }
-    }), 200
+    return jsonify({"galleries": result}), 200

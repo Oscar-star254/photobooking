@@ -6,7 +6,8 @@ from utils.db import get_db
 
 
 def create_review():
-    identity = get_jwt_identity()
+   identity = get_jwt_identity()
+user_id, role = _get_user_id_and_role(identity)
     data = request.get_json()
 
     if not data.get("rating"):
@@ -27,7 +28,7 @@ def create_review():
     if not booking:
         return jsonify({"error": "Booking not found"}), 404
 
-    if booking["user_id"] != identity["id"]:
+    if booking["user_id"] != user_id:
         return jsonify({"error": "Access denied"}), 403
 
     if booking["payment_status"] != "paid":
@@ -38,11 +39,11 @@ def create_review():
     if existing:
         return jsonify({"error": "You have already reviewed this booking"}), 409
 
-    user = db.users.find_one({"_id": ObjectId(identity["id"])})
+    user = db.users.find_one({"_id": ObjectId(user_id)})
 
     review_doc = {
         "booking_id":    booking_id,
-        "user_id":       identity["id"],
+        "user_id":       user_id],
         "full_name":     user["full_name"] if user else "Anonymous",
         "rating":        int(data["rating"]),
         "comment":       data.get("comment", "").strip(),
@@ -100,7 +101,8 @@ def get_reviews():
 
 def delete_review(review_id):
     identity = get_jwt_identity()
-    if identity["role"] != "admin":
+user_id, role = _get_user_id_and_role(identity)
+    if role != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
     db = get_db()
@@ -113,7 +115,8 @@ def delete_review(review_id):
 
 
 def check_can_review(booking_id):
-    identity = get_jwt_identity()
+   identity = get_jwt_identity()
+user_id, role = _get_user_id_and_role(identity)
     db = get_db()
 
     try:
@@ -124,7 +127,7 @@ def check_can_review(booking_id):
     if not booking:
         return jsonify({"can_review": False}), 200
 
-    if booking["user_id"] != identity["id"]:
+    if booking["user_id"] != user_id:
         return jsonify({"can_review": False}), 200
 
     if booking["payment_status"] != "paid":

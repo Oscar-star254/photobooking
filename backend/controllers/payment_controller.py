@@ -7,7 +7,8 @@ from services.mpesa_service import mpesa
 
 
 def initiate_payment():
-    identity = get_jwt_identity()
+   identity = get_jwt_identity()
+user_id, role = _get_user_id_and_role(identity)
     data     = request.get_json()
 
     if not data.get("booking_id") or not data.get("phone"):
@@ -23,7 +24,7 @@ def initiate_payment():
     if not booking:
         return jsonify({"error": "Booking not found"}), 404
 
-    if identity["role"] != "admin" and booking["user_id"] != identity["id"]:
+    if identity["role"] != "admin" and booking["user_id"] != user_id:
         return jsonify({"error": "Access denied"}), 403
 
     if booking["payment_status"] == "paid":
@@ -32,7 +33,7 @@ def initiate_payment():
     # Create pending payment record
     payment_doc = {
         "booking_id":          str(booking["_id"]),
-        "user_id":             identity["id"],
+        "user_id":             user_id,
         "amount":              booking["package_price"],
         "phone":               data["phone"],
         "status":              "pending",
@@ -136,7 +137,8 @@ def mpesa_callback():
 
 
 def check_payment_status():
-    identity   = get_jwt_identity()
+    identity = get_jwt_identity()
+user_id, role = _get_user_id_and_role(identity)
     payment_id = request.args.get("payment_id")
 
     if not payment_id:
@@ -152,7 +154,7 @@ def check_payment_status():
     if not payment:
         return jsonify({"error": "Payment not found"}), 404
 
-    if identity["role"] != "admin" and payment["user_id"] != identity["id"]:
+    if identity["role"] != "admin" and payment["user_id"] != user_id:
         return jsonify({"error": "Access denied"}), 403
 
     return jsonify({
@@ -165,10 +167,11 @@ def check_payment_status():
 
 def get_my_payments():
     identity = get_jwt_identity()
+user_id, role = _get_user_id_and_role(identity)
     db       = get_db()
 
     payments = list(db.payments.find(
-        {"user_id": identity["id"]},
+        {"user_id": user_id},
         sort=[("created_at", -1)]
     ))
 
