@@ -58,8 +58,6 @@ def update_booking_status(booking_id):
         {"_id": ObjectId(booking_id)},
         {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc)}}
     )
-
-    # Send WhatsApp notification when booking is confirmed
     if new_status == "confirmed":
         try:
             user = db.users.find_one({"_id": ObjectId(booking["user_id"])})
@@ -73,7 +71,6 @@ def update_booking_status(booking_id):
                 )
         except Exception as e:
             print(f"WhatsApp notification failed: {e}")
-
     return jsonify({"message": f"Booking status updated to '{new_status}'"}), 200
 
 
@@ -93,14 +90,14 @@ def create_gallery_for_booking(booking_id):
             "gallery_id": str(existing["_id"])
         }), 409
     gallery_doc = {
-        "booking_id":  booking_id,
-        "user_id":     booking["user_id"],
-        "title":       data.get("title", booking["package_name"]),
-        "is_paid":     False,
-        "is_ready":    False,
-        "cover_url":   None,
-        "created_at":  datetime.now(timezone.utc),
-        "updated_at":  datetime.now(timezone.utc),
+        "booking_id": booking_id,
+        "user_id":    booking["user_id"],
+        "title":      data.get("title", booking["package_name"]),
+        "is_paid":    False,
+        "is_ready":   False,
+        "cover_url":  None,
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
     }
     result = db.galleries.insert_one(gallery_doc)
     db.bookings.update_one(
@@ -114,7 +111,7 @@ def create_gallery_for_booking(booking_id):
 
 
 def get_analytics():
-    db           = get_db()
+    db            = get_db()
     paid_payments = list(db.payments.find({"status": "paid"}))
     total_revenue = sum(p.get("amount", 0) for p in paid_payments)
     recent        = list(db.bookings.find({}, sort=[("created_at", -1)], limit=5))

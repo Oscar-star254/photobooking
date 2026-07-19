@@ -5,19 +5,25 @@ from bson import ObjectId
 from utils.db import get_db
 
 
+def _get_user_id_and_role(identity):
+    if isinstance(identity, str):
+        return identity, "client"
+    return identity.get("id"), identity.get("role", "client")
+
+
 def create_review():
-    identity = get_jwt_identity()
+    identity      = get_jwt_identity()
     user_id, role = _get_user_id_and_role(identity)
-    data = request.get_json()
+    data          = request.get_json()
+
     if not data.get("rating"):
         return jsonify({"error": "Rating is required"}), 400
 
-    db = get_db()
-
-    # Check booking exists and belongs to user
     booking_id = data.get("booking_id")
     if not booking_id:
         return jsonify({"error": "booking_id is required"}), 400
+
+    db = get_db()
 
     try:
         booking = db.bookings.find_one({"_id": ObjectId(booking_id)})
@@ -30,10 +36,6 @@ def create_review():
     if booking["user_id"] != user_id:
         return jsonify({"error": "Access denied"}), 403
 
-    if booking["payment_status"] != "paid":
-        return jsonify({"error": "You can only review after payment"}), 403
-
-    # Check if review already exists for this booking
     existing = db.reviews.find_one({"booking_id": booking_id})
     if existing:
         return jsonify({"error": "You have already reviewed this booking"}), 409
@@ -41,33 +43,24 @@ def create_review():
     user = db.users.find_one({"_id": ObjectId(user_id)})
 
     review_doc = {
-        "booking_id":    booking_id,
-        "user_id":       user_id],
-        "full_name":     user["full_name"] if user else "Anonymous",
-        "rating":        int(data["rating"]),
-        "comment":       data.get("comment", "").strip(),
-        "package_name":  booking["package_name"],
-        "is_approved":   True,
-        "created_at":    datetime.now(timezone.utc),
+        "booking_id":   booking_id,
+        "user_id":      user_id,
+        "full_name":    user["full_name"] if user else "Anonymous",
+        "rating":       int(data["rating"]),
+        "comment":      data.get("comment", "").strip(),
+        "package_name": booking.get("package_name", ""),
+        "is_approved":  True,
+        "created_at":   datetime.now(timezone.utc),
     }
 
     db.reviews.insert_one(review_doc)
-
-    # Notify admin via db flag
-    db.notifications.insert_one({
-        "type":       "new_review",
-        "message":    f"New review from {user['full_name']} — {int(data['rating'])} stars",
-        "is_read":    False,
-        "created_at": datetime.now(timezone.utc),
-    })
-
     return jsonify({"message": "Review submitted successfully"}), 201
 
 
 def get_reviews():
-    db = get_db()
-    rating_filter = request.args.get("rating")
-    search = request.args.get("search", "")
+    db             = get_db()
+    rating_filter  = request.args.get("rating")
+    search         = request.args.get("search", "")
 
     query = {"is_approved": True}
     if rating_filter:
@@ -87,9 +80,8 @@ def get_reviews():
         "created_at":   r["created_at"].isoformat() if r.get("created_at") else None,
     } for r in reviews]
 
-    # Calculate average
-    all_reviews = list(db.reviews.find({"is_approved": True}))
-    avg = round(sum(r["rating"] for r in all_reviews) / len(all_reviews), 1) if all_reviews else 0
+    all_reviews   = list(db.reviews.find({"is_approved": True}))
+    avg           = round(sum(r["rating"] for r in all_reviews) / len(all_reviews), 1) if all_reviews else 0
 
     return jsonify({
         "reviews": result,
@@ -99,8 +91,9 @@ def get_reviews():
 
 
 def delete_review(review_id):
-    identity = get_jwt_identity()
-user_id, role = _get_user_id_and_role(identity)
+    identity      = get_jwt_identity()
+    user_id, role = _get_user_id_and_role(identity)
+
     if role != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
@@ -114,9 +107,9 @@ user_id, role = _get_user_id_and_role(identity)
 
 
 def check_can_review(booking_id):
-   identity = get_jwt_identity()
-user_id, role = _get_user_id_and_role(identity)
-    db = get_db()
+    identity      = get_jwt_identity()
+    user_id, role = _get_user_id_and_role(identity)
+    db            = get_db()
 
     try:
         booking = db.bookings.find_one({"_id": ObjectId(booking_id)})
@@ -128,9 +121,6 @@ user_id, role = _get_user_id_and_role(identity)
 
     if booking["user_id"] != user_id:
         return jsonify({"can_review": False}), 200
-
-    if booking["payment_status"] != "paid":
-        return jsonify({"can_review": False, "reason": "Payment required"}), 200
 
     existing = db.reviews.find_one({"booking_id": booking_id})
     if existing:
