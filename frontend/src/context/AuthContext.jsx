@@ -8,32 +8,17 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token     = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
 
-    if (token && savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser);
-        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        setUser(parsedUser);
-      } catch (e) {
-        console.error("Error parsing saved user:", e);
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-      } finally {
-        setLoading(false);
-      }
-    } else if (token) {
-      // Token exists but no saved user, fetch profile
+    if (token) {
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       api.get("/auth/profile")
         .then(res => {
-          const userData = res.data.user;
-          setUser(userData);
-          localStorage.setItem("user", JSON.stringify(userData));
+          setUser(res.data.user);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
         })
-        .catch((err) => {
-          console.error("Error fetching profile:", err);
+        .catch(() => {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           delete api.defaults.headers.common["Authorization"];
@@ -45,58 +30,23 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    try {
-      const res = await api.post("/auth/login", { email, password });
-      const token = res.data?.token || res.data?.access_token;
-      const user = res.data?.user || res.data?.profile || null;
-
-      if (!token || !user) {
-        throw new Error("Invalid response: missing token or user data");
-      }
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      setUser(user);
-      return user;
-    } catch (error) {
-      // Clean up on failure
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      delete api.defaults.headers.common["Authorization"];
-      // normalize error message from server
-      const serverMessage = error?.response?.data?.error || error.message || "Login failed";
-      const err = new Error(serverMessage);
-      err.original = error;
-      throw err;
-    }
+    const res = await api.post("/auth/login", { email, password });
+    const { token, user } = res.data;
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    setUser(user);
+    return user;
   };
 
   const register = async (data) => {
-    try {
-      const res = await api.post("/auth/register", data);
-      const token = res.data?.token || res.data?.access_token;
-      const user = res.data?.user || res.data?.profile || null;
-
-      if (!token || !user) {
-        throw new Error("Invalid response: missing token or user data");
-      }
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      setUser(user);
-      return user;
-    } catch (error) {
-      // Clean up on failure
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      delete api.defaults.headers.common["Authorization"];
-      const serverMessage = error?.response?.data?.error || error.message || "Registration failed";
-      const err = new Error(serverMessage);
-      err.original = error;
-      throw err;
-    }
+    const res = await api.post("/auth/register", data);
+    const { token, user } = res.data;
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    setUser(user);
+    return user;
   };
 
   const logout = () => {
@@ -113,10 +63,4 @@ export function AuthProvider({ children }) {
   );
 }
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);

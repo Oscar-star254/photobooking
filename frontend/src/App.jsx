@@ -4,13 +4,13 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { useEffect } from "react";
 
-import LandingPage     from "./pages/LandingPage";
-import PortfolioPage   from "./pages/PortfolioPage";
-import BookingPage     from "./pages/BookingPage";
-import LoginPage       from "./pages/LoginPage";
-import RegisterPage    from "./pages/RegisterPage";
-import ReviewPage      from "./pages/ReviewPage";
-import ContactPage     from "./pages/ContactPage";
+import LandingPage    from "./pages/LandingPage";
+import PortfolioPage  from "./pages/PortfolioPage";
+import BookingPage    from "./pages/BookingPage";
+import LoginPage      from "./pages/LoginPage";
+import RegisterPage   from "./pages/RegisterPage";
+import ReviewPage     from "./pages/ReviewPage";
+import ContactPage    from "./pages/ContactPage";
 
 import ClientDashboard from "./pages/client/ClientDashboard";
 import MyBookings      from "./pages/client/MyBookings";
@@ -22,19 +22,21 @@ import AdminBookings   from "./pages/admin/AdminBookings";
 import AdminClients    from "./pages/admin/AdminClients";
 import AdminGallery    from "./pages/admin/AdminGallery";
 import AdminPortfolio  from "./pages/admin/AdminPortfolio";
-import AdminReviews from "./pages/admin/AdminReviews";
+import AdminReviews    from "./pages/admin/AdminReviews";
 
 function WhatsAppButton() {
   useEffect(() => {
-    const btn = document.createElement("a");
-    btn.href = "https://wa.me/254758695620";
-    btn.target = "_blank";
-    btn.rel = "noopener noreferrer";
-    btn.id = "whatsapp-btn";
+    const existing = document.getElementById("whatsapp-btn");
+    if (existing) return;
+    const btn      = document.createElement("a");
+    btn.href       = "https://wa.me/254758695620";
+    btn.target     = "_blank";
+    btn.rel        = "noopener noreferrer";
+    btn.id         = "whatsapp-btn";
     btn.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:9999;width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,0.4);text-decoration:none;";
-    const img = document.createElement("img");
-    img.src = "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg";
-    img.alt = "WhatsApp";
+    const img      = document.createElement("img");
+    img.src        = "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg";
+    img.alt        = "WhatsApp";
     img.style.cssText = "width:32px;height:32px;";
     btn.appendChild(img);
     document.body.appendChild(btn);
@@ -52,7 +54,10 @@ function AppRoutes() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <div className="w-12 h-12 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-400 font-body text-sm">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -60,7 +65,6 @@ function AppRoutes() {
   return (
     <>
       <Routes>
-        {/* Public */}
         <Route path="/"          element={<LandingPage />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
         <Route path="/book"      element={<BookingPage />} />
@@ -69,7 +73,6 @@ function AppRoutes() {
         <Route path="/reviews"   element={<ReviewPage />} />
         <Route path="/contact"   element={<ContactPage />} />
 
-        {/* Client */}
         <Route path="/dashboard" element={
           <ProtectedRoute><ClientDashboard /></ProtectedRoute>
         } />
@@ -82,11 +85,7 @@ function AppRoutes() {
         <Route path="/dashboard/gallery/:galleryId" element={
           <ProtectedRoute><GalleryView /></ProtectedRoute>
         } />
-        <Route path="/admin/reviews" element={
-  <ProtectedRoute role="admin"><AdminReviews /></ProtectedRoute>
-} />
 
-        {/* Admin */}
         <Route path="/admin" element={
           <ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>
         } />
@@ -101,6 +100,9 @@ function AppRoutes() {
         } />
         <Route path="/admin/portfolio" element={
           <ProtectedRoute role="admin"><AdminPortfolio /></ProtectedRoute>
+        } />
+        <Route path="/admin/reviews" element={
+          <ProtectedRoute role="admin"><AdminReviews /></ProtectedRoute>
         } />
 
         <Route path="*" element={<Navigate to="/" replace />} />

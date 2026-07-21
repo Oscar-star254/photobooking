@@ -5,28 +5,26 @@ import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
 export default function LoginPage() {
-  const [form, setForm]     = useState({ email: "", password: "" });
-  const [showPw, setShowPw] = useState(false);
+  const [form, setForm]       = useState({ email: "", password: "" });
+  const [showPw, setShowPw]   = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const { login }             = useAuth();
+  const navigate              = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const user = await login(form.email, form.password);
-      const firstName = user?.full_name ? user.full_name.split(" ")[0] : "User";
-      toast.success(`Welcome back, ${firstName}!`);
-      // Navigate using React Router instead of window.location for better UX
-      if (user?.role === "admin") {
+      toast.success(`Welcome back, ${user.full_name.split(" ")[0]}!`);
+      if (user.role === "admin") {
         navigate("/admin", { replace: true });
       } else {
         navigate("/dashboard", { replace: true });
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.error || "Login failed. Please try again.";
-      toast.error(errorMsg);
+      toast.error(err.response?.data?.error || "Login failed.");
+    } finally {
       setLoading(false);
     }
   };
@@ -44,7 +42,7 @@ export default function LoginPage() {
             </span>
           </Link>
           <h1 className="font-display text-3xl font-bold text-white">Welcome back</h1>
-          <p className="text-gray-400 font-body mt-2">Sign in to access your gallery</p>
+          <p className="text-gray-400 font-body mt-2">Sign in to access your account</p>
         </div>
 
         <div className="card">
@@ -60,7 +58,6 @@ export default function LoginPage() {
                 required
               />
             </div>
-
             <div>
               <label className="label">Password</label>
               <div className="relative">
@@ -81,7 +78,6 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-
             <button
               type="submit"
               disabled={loading}
